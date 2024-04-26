@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Tabser</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="error_title_is_empty">Title may not be empty!</string>
+    <string name="error_title">Error!</string>
+    <string name="error_year_is_empty">Year may not be empty!</string>
+    <string name="error_artist_is_empty">Artist may not be empty!</string>
+    <string name="error_instrument_is_empty">Instrument may not be empty!</string>
+</resources>

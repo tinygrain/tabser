@@ -35,3 +35,10 @@ jobs:
       with:
         name: ${{ env.date_today }} - ${{ env.playstore_name }} - ${{ env.repository_name }} - APK(s) debug generated
         path: ${{ env.main_project_module }}/build/outputs/apk/debug/
+
+    - name: Step 3 - Use the Upload Artifact GitHub Action
+      uses: actions/upload-artifact@v4
+      with: 
+        name: assets-for-download
+        path: ${{ env.main_project_module }}/build/outputs/apk/debug/
+

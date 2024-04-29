@@ -3,24 +3,52 @@ package app.tabser.view;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
 import android.graphics.Paint;
+import android.graphics.PathEffect;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.view.MotionEvent;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 import app.tabser.R;
 import app.tabser.model.Bar;
 import app.tabser.model.Note;
+import app.tabser.model.Sequence;
 import app.tabser.model.TabModel;
 
 class TabSheet {
-    private static final int CURSOR_COLOR = Color.GREEN;
-    private static final int FOREGROUND_COLOR = Color.BLACK;
-    private static final int BACKGROUND_COLOR = Color.WHITE;
+
+    public enum Mode {
+        EDIT, VIEW;
+    }
+
+    private final class ModelCursor {
+        private String sequenceKey = Sequence.DEFAULT_HIDDEN_SEQUENCE_NAME;
+        private int barIndex;
+        private int beatIndex;
+        private Rect selectionArea;
+
+        private void setRect(float left, float top, float right, float bottom) {
+            setRect((int) left, (int) top, (int) right, (int) bottom);
+        }
+
+        private void setRect(int left, int top, int right, int bottom) {
+            selectionArea = new Rect(left, top, right, bottom);
+        }
+    }
+
+    private final int foregroundColorActive;
+    private final int foregroundColor;
+    private final int backgroundColor;
+    private final Design design;
     private boolean insert;
-    private int barIndex;
-    private int beatIndex;
+    //private int barIndex;
+    //private int beatIndex;
     private final TabView tabView;
     private float strokeWidth = 5f;
     private float yIncrement = 50f;
@@ -31,100 +59,221 @@ class TabSheet {
     private boolean compact;
     private boolean autoNext;
     private boolean autoBar;
-    private float xCursor;
+    // private float xCursor;
+    //private String sequenceKey = Sequence.DEFAULT_HIDDEN_SEQUENCE_NAME;
+    private Mode mode = Mode.EDIT;
 
-    TabSheet(TabView tabView) {
+    private ModelCursor[] displayedCursorPositions;
+    private ModelCursor modelCursor;
+
+    TabSheet(TabView tabView, Design design) {
+        this.design = design;
         this.context = tabView.getContext();
         this.tabView = tabView;
+        this.backgroundColor = design.getBackgroundColorSheet();
+        this.foregroundColorActive = design.getForegroundColorActiveSheet();
+        this.foregroundColor = design.getForegroundColorInactiveSheet();
+        modelCursor = new ModelCursor();
+    }
+
+    public Mode getMode() {
+        return mode;
+    }
+
+    public void setMode(Mode mode) {
+        this.mode = mode;
     }
 
     void loadModel(TabModel model) {
         this.model = model;
     }
 
-    void drawSheet(Canvas canvas, Paint paint, boolean fullView, int stringCount) {
-        float yPos = yStart;
-        Rect all = new Rect(0, 0, tabView.getTabViewWidth(), tabView.getTabViewHeight());
-        paint.setColor(BACKGROUND_COLOR);
-        canvas.drawRect(all, paint);
+    float drawSheet(Canvas canvas, Paint paint, boolean fullView, int stringCount, float yStart, boolean appendControls, int[] offsetBarBeat) {
+        // float yStart = this.yStart;
+        // Rect all = new Rect(0, 0, tabView.getTabViewWidth(), tabView.getTabViewHeight());
         paint.setStrokeWidth(strokeWidth);
-        paint.setColor(FOREGROUND_COLOR);
+        int a = 80;
+        Color rgb = Color.valueOf(foregroundColor);
+        paint.setARGB(a, (int) rgb.red(), (int) rgb.green(), (int) rgb.blue());
+        paint.setTextSize(yIncrement);
+        //float defWidth = paint.measureText("88")+xStart;
+        float yCursor = yStart;
         float xCursor = 0;
         if (fullView) {
+            /*
+             * Draw Staff Lines
+             */
             for (int i = 0; i < 5; i++) {
-                canvas.drawLine(xStart, yPos, tabView.getTabViewWidth() - xStart, yPos, paint);
-                yPos += yIncrement;
+                canvas.drawLine(xStart, yCursor, tabView.getTabViewWidth() - xStart, yCursor, paint);
+                yCursor += yIncrement;
             }
-            int x = (int) (xStart * 2);
-            int width = 0;
-            if (model.getClef() == TabModel.Clef.BASS) {
-                width = (int) (yIncrement * (3.3 / 20 * 18));
-                Drawable bassClef = ViewUtils.getDrawable(context, R.drawable.f_clef, x, (int) yStart,
-                        width, (int) (yIncrement * 3.3));
-                bassClef.draw(canvas);
-            } else {
-                width = (int) (yIncrement * (7 / 165.6 * 58.6));
-                Drawable trebleClef = ViewUtils.getDrawable(context, R.drawable.g_clef, x,
-                        (int) (yStart - yIncrement * 1.33), width, (int) (yIncrement * 7));
-                trebleClef.draw(canvas);
-            }
-            yPos += 3 * yIncrement;
-            xCursor = 2 * xStart + width + xStart;
+            int clefStart = drawClef(canvas, paint, model.getClef());
+            yCursor += 3 * yIncrement;
+            xCursor = 2 * xStart + clefStart + xStart;
         }
-        float yTab = yPos;
+        /*
+         * Draw tabulature lines
+         */
+        float yTabStart = yCursor;
         for (int i = 0; i < stringCount; i++) {
-            canvas.drawLine(xStart, yPos, tabView.getTabViewWidth() - xStart, yPos, paint);
+            canvas.drawLine(xStart, yCursor, tabView.getTabViewWidth() - xStart, yCursor, paint);
             if (i + 1 < stringCount) {
-                yPos += yIncrement;
+                yCursor += yIncrement;
             }
         }
+        float yEnd = yCursor;
+        /*
+         * Draw Tab Clef
+         */
         int tabClefHeight = (int) ((stringCount - 1) * yIncrement);
         int tabClefWidth = (int) (tabClefHeight / 112.3f * 27.7f);
-        Drawable tabClef = ViewUtils.getDrawable(context, R.drawable.tab_clef, (int) (xStart * 2),
-                (int) (yTab + tabClefHeight * 0.05), tabClefWidth, (int) (tabClefHeight * 0.9));
-        tabClef.draw(canvas);
-        canvas.drawLine(xStart, yStart, xStart, yPos, paint);
+        {
+            Drawable tabClef = ViewUtils.getDrawable(context, R.drawable.tab_clef, (int) (xStart * 2),
+                    (int) (yTabStart + tabClefHeight * 0.05), tabClefWidth, (int) (tabClefHeight * 0.9));
+            tabClef.setTint(paint.getColor());
+            tabClef.draw(canvas);
+        }
+        /*
+         * Draw beginning bar line
+         */
+        canvas.drawLine(xStart, yStart, xStart, yCursor, paint);
+        paint.setColor(foregroundColor);
         /*
          * Notes
          */
-        paint.setTextSize(yIncrement);
         xCursor = Math.max(xCursor, xStart * 2 + tabClefWidth + xStart);
-        int barIndex = 0;
-        int beatIndex = 0;
-        for (Bar bar : model.getBars()) {
-            beatIndex = 0;
+        drawNotes(canvas, paint, xCursor, yStart, yEnd, appendControls, a, rgb, yTabStart, stringCount, offsetBarBeat);
+        /*
+         * Draw active cursor position
+         */
+        Color rgb2 = Color.valueOf(foregroundColorActive);
+
+        paint.setARGB(32, (int) rgb2.red(), (int) rgb2.green(), (int) rgb2.blue());
+        if (modelCursor.selectionArea.left == modelCursor.selectionArea.right) {
+            PathEffect paintEffect = paint.getPathEffect();
+            paint.setPathEffect(new DashPathEffect(new float[]{15f, 5f}, 0f));
+            canvas.drawLine(
+                    modelCursor.selectionArea.left,
+                    modelCursor.selectionArea.top,
+                    modelCursor.selectionArea.left,
+                    modelCursor.selectionArea.bottom, paint);
+            paint.setPathEffect(paintEffect);
+        } else {
+            //paint.setStyle(Paint.Style.STROKE);
+            canvas.drawRect(modelCursor.selectionArea, paint);
+            paint.setStyle(Paint.Style.FILL);
+        }
+        return yEnd + yIncrement * 3;
+    }
+
+    private void drawNotes(Canvas canvas, Paint paint, float xCursor, float yStart, float yEnd,
+                           boolean appendControls, int a, Color rgb, float yTabStart, int stringCount, int[] offsetBarBeat) {
+        int barIndex = offsetBarBeat[0];
+        int beatIndex = offsetBarBeat[1];
+        /*
+         * Set initial cursor position
+         */
+        // this.modelCursor.x = xCursor;
+        if (!appendControls) {
+            modelCursor.setRect((int) xCursor, (int) yStart, (int) xCursor, (int) yEnd);
+        }
+        List<ModelCursor> cursorPositions;
+        if (appendControls && Objects.nonNull(displayedCursorPositions)) {
+            cursorPositions = new ArrayList<>(Arrays.asList(displayedCursorPositions));
+        } else {
+            cursorPositions = new ArrayList<>();
+        }
+        ArrayList<Bar> bars = model.getBars(modelCursor.sequenceKey);
+        for (int i = barIndex; i < bars.size(); i++) {
+            if (xCursor > tabView.getTabViewWidth() * 0.75) {
+                return;
+            }
+            Bar bar = bars.get(i);
+            if (beatIndex == 0) {
+                paint.setARGB(a, (int) rgb.red(), (int) rgb.green(), (int) rgb.blue());
+                // Bar Number
+                canvas.drawText(String.valueOf(barIndex + 1), xCursor, (int) (yStart - yIncrement * 0.666), paint);
+                paint.setColor(foregroundColor);
+            }
+            int maxWidth = 0;
             for (Note[] notes : bar.getNotes()) {
-                int maxWidth = 0;
                 for (Note n : notes) {
                     if (Objects.nonNull(n)) {
                         int string = n.getString();
                         String fret = n.getFret() > -1 ? String.valueOf(n.getFret()) : "X";
                         Rect fretRect = new Rect();
                         paint.getTextBounds(fret, 0, fret.length(), fretRect);
-                        float y = yTab + yIncrement * (stringCount - 1 - string) + yIncrement / 3;
-                        paint.setColor(BACKGROUND_COLOR);
+                        float y = yTabStart + yIncrement * (stringCount - 1 - string) + yIncrement / 3;
+                        paint.setColor(backgroundColor);
                         Rect blankRect = new Rect((int) xCursor, (int) y + fretRect.top, (int) (xCursor + fretRect.right), (int) (y));
                         canvas.drawRect(blankRect, paint);
-                        paint.setColor(FOREGROUND_COLOR);
+                        paint.setColor(foregroundColor);
                         canvas.drawText(fret, xCursor, y, paint);
                         maxWidth = Math.max(maxWidth, fretRect.right);
                     }
                 }
-                if (this.barIndex == barIndex && this.beatIndex == beatIndex) {
-                    this.xCursor = xCursor;
+                if (modelCursor.barIndex == barIndex && modelCursor.beatIndex == beatIndex) {
+                    //modelCursor.xCursor = xCursor;
+                    modelCursor.setRect((int) xCursor, (int) yStart, (int) (xCursor + maxWidth), (int) yEnd);
+                    cursorPositions.add(modelCursor);
+                } else {
+                    ModelCursor newPos = new ModelCursor();
+                    newPos.barIndex = barIndex;
+                    newPos.beatIndex = beatIndex;
+                    newPos.setRect((int) xCursor, (int) yStart, (int) (xCursor + maxWidth), (int) yEnd);
+                    cursorPositions.add(newPos);
                 }
                 xCursor += maxWidth + xStart;
                 beatIndex++;
+                offsetBarBeat[1] = beatIndex;
             }
-            canvas.drawLine(this.xCursor, yStart, this.xCursor, yTab + yIncrement * (model.getTuning().getStringCount() - 1), paint);
-            xCursor += xStart;
+            this.displayedCursorPositions = cursorPositions.toArray(new ModelCursor[0]);
+            /*
+             * Draw Bar Line
+             */
+            if (Objects.nonNull(bar.getSeparator())) {
+                paint.setARGB(a, (int) rgb.red(), (int) rgb.green(), (int) rgb.blue());
+                canvas.drawLine(
+                        xCursor,
+                        yStart,
+                        xCursor,
+                        yTabStart + yIncrement * (model.getTuning().getStringCount() - 1), paint);
+                paint.setColor(foregroundColor);
+                xCursor += xStart;
+            }
             barIndex++;
+            beatIndex = 0;
+            offsetBarBeat[0] = barIndex;
+            offsetBarBeat[1] = 0;
         }
-        if (this.barIndex == barIndex - 1 && this.beatIndex == beatIndex) {
-            this.xCursor = xCursor;
+        if (modelCursor.barIndex == barIndex - 1 && modelCursor.beatIndex == beatIndex) {
+            //this.xCursor = xCursor;
+            modelCursor.setRect(xCursor, yStart, xCursor, yEnd);
         }
-        paint.setColor(CURSOR_COLOR);
-        canvas.drawLine(this.xCursor, yStart, this.xCursor, yTab + yIncrement * (model.getTuning().getStringCount() - 1), paint);
+    }
+
+    private int drawClef(Canvas canvas, Paint paint, TabModel.Clef clef) {
+        int width;
+        int x = (int) (xStart * 2);
+        if (clef == TabModel.Clef.BASS) {
+            width = (int) (yIncrement * (3.3 / 20 * 18));
+            Drawable bassClef = ViewUtils.getDrawable(context, R.drawable.f_clef, x, (int) yStart,
+                    width, (int) (yIncrement * 3.3));
+            bassClef.setTint(paint.getColor());
+            bassClef.draw(canvas);
+        } else {
+            width = (int) (yIncrement * (7 / 165.6 * 58.6));
+            Drawable trebleClef = ViewUtils.getDrawable(context, R.drawable.g_clef, x,
+                    (int) (yStart - yIncrement * 1.33), width, (int) (yIncrement * 7));
+            trebleClef.setTint(paint.getColor());
+            trebleClef.draw(canvas);
+        }
+        return width;
+    }
+
+
+    public String getSequenceKey() {
+        return modelCursor.sequenceKey;
     }
 
     public boolean isCompact() {
@@ -156,39 +305,66 @@ class TabSheet {
     }
 
     public void start() {
-        barIndex = 0;
-        beatIndex = 0;
+        modelCursor.barIndex = 0;
+        modelCursor.beatIndex = 0;
     }
 
     public void previousBeat() {
-        if (beatIndex > 0) {
-            beatIndex--;
+        if (modelCursor.beatIndex > 0) {
+            modelCursor.beatIndex--;
         } else {
             previousBar();
+            if (model.getBars(modelCursor.sequenceKey).get(modelCursor.barIndex).size() > 0) {
+                modelCursor.beatIndex = model.getBars(modelCursor.sequenceKey).get(modelCursor.barIndex).size() - 1;
+            }
         }
     }
 
     public void previousBar() {
-        if (barIndex > 0) {
-            barIndex--;
-            beatIndex = model.getBars().get(barIndex).size() - 1;
+        if (modelCursor.barIndex > 0) {
+            modelCursor.barIndex--;
+            modelCursor.beatIndex = 0;
         }
     }
 
     public void nextBeat() {
-        if (beatIndex < model.getBars().get(model.getBars().size() - 1).size()) {
-            beatIndex++;
+        if (modelCursor.beatIndex == model.getBars(modelCursor.sequenceKey).get(modelCursor.barIndex).size() - 1
+                && modelCursor.barIndex == model.getBars(modelCursor.sequenceKey).size() - 1) {
+            /*
+             * set new (non existent) index (end)
+             */
+            modelCursor.beatIndex++;
+        } else if (modelCursor.beatIndex < model.getBars(modelCursor.sequenceKey).get(modelCursor.barIndex).size() - 1) {
+            /*
+             * set existent index
+             */
+            modelCursor.beatIndex++;
+        } else {
+            nextBar();
         }
     }
 
     public void nextBar() {
-        barIndex++;
-        beatIndex = 0;
+        if (modelCursor.barIndex < model.getBars(modelCursor.sequenceKey).size() - 1) {
+            modelCursor.barIndex++;
+            modelCursor.beatIndex = 0;
+        }
     }
 
     public void end() {
-        barIndex = model.getBars().size() - 1;
-        beatIndex = model.getBars().get(barIndex).size();
+        modelCursor.barIndex = model.getBars(modelCursor.sequenceKey).size() - 1;
+        modelCursor.beatIndex = model.getBars(modelCursor.sequenceKey).get(modelCursor.barIndex).size();
+    }
+
+    public void newBar() {
+        ArrayList<Bar> bars = model.getBars(modelCursor.sequenceKey);
+        if (modelCursor.barIndex == bars.size() - 1
+                && modelCursor.beatIndex == bars.get(modelCursor.barIndex).size() && modelCursor.beatIndex > 0) {
+            bars.get(bars.size() - 1).setSeparator(Bar.SeparatorBar.NORMAL);
+            model.addBar(modelCursor.sequenceKey);
+            modelCursor.barIndex++;
+            modelCursor.beatIndex = 0;
+        }
     }
 
     float getXStart() {
@@ -200,11 +376,30 @@ class TabSheet {
     }
 
     public int getBarIndex() {
-        return barIndex;
+        return modelCursor.barIndex;
     }
 
     public int getBeatIndex() {
-        return beatIndex;
+        return modelCursor.beatIndex;
     }
 
+    public boolean isInsert() {
+        return insert;
+    }
+
+    public void setInsert(boolean insert) {
+        this.insert = insert;
+    }
+
+    void onTouch(MotionEvent event, boolean longClick) {
+        int x = (int) event.getX();
+        int y = (int) event.getY();
+        for (ModelCursor c : displayedCursorPositions) {
+            if (c.selectionArea.contains(x, y)) {
+                modelCursor = c;
+                break;
+            }
+        }
+        tabView.invalidate();
+    }
 }

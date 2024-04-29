@@ -16,4 +16,11 @@ class ViewUtils {
         d.setBounds(r);
         return d;
     }
+
+    public static Drawable colorVector(Context c, int drawable, int color) {
+        Drawable d = ResourcesCompat.getDrawable(c.getResources(), drawable, null);
+        Drawable cd = d.mutate();
+        cd.setTint(color);
+        return cd;
+    }
 }

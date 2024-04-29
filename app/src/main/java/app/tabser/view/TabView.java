@@ -5,16 +5,22 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 
 import java.util.Objects;
 
 import app.tabser.model.TabModel;
 
-public class TabView extends View implements View.OnTouchListener {
+public class TabView extends View implements View.OnTouchListener, View.OnLongClickListener {
     private int width;
     private int height;
     private TabModel model;
@@ -22,15 +28,40 @@ public class TabView extends View implements View.OnTouchListener {
     private final Context context;
     private final TabSheet sheet;
     private final TabKeyboard keyboard;
+    private boolean longClick;
+
+    private final GestureDetector gestureDetector;
+    private final Handler handler = new Handler();
+    Runnable touchScheduler = new Runnable() {
+        public void run() {
+            longClick = true;
+        }
+    };
+
 
     public TabView(Context context, AttributeSet attr) {
         super(context, attr);
         this.keyboardRect = new Rect();
         setOnTouchListener(this);
+        setOnLongClickListener(this);
         this.context = context;
         setBackgroundColor(Color.WHITE);
-        sheet = new TabSheet(this);
-        keyboard = new TabKeyboard(keyboardRect, sheet);
+        Design design = Design.PAPER_MODE;
+        sheet = new TabSheet(this, design);
+        keyboard = new TabKeyboard(keyboardRect, sheet, context, design);
+        gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
+
+            @Override
+            public void onLongPress(@NonNull MotionEvent e) {
+                Log.d("GestureListener", e.toString());
+            }
+
+            @Override
+            public boolean onContextClick(@NonNull MotionEvent e) {
+                Log.d("GestureListener", e.toString());
+                return false;
+            }
+        });
     }
 
     public void loadModel(TabModel model) {
@@ -53,7 +84,15 @@ public class TabView extends View implements View.OnTouchListener {
         super.onDraw(canvas);
         Paint paint = new Paint();
         if (Objects.nonNull(model)) {
-            sheet.drawSheet(canvas, paint, !sheet.isCompact(), model.getTuning().getStringCount());
+            float y = 120;
+            int[] offsetBarBeat = {0, 0};
+            y = sheet.drawSheet(canvas, paint, !sheet.isCompact(), model.getTuning().getStringCount(),
+                    y, false, offsetBarBeat);
+
+            y = sheet.drawSheet(canvas, paint, !sheet.isCompact(), model.getTuning().getStringCount(),
+                    y, true, offsetBarBeat);
+            y = sheet.drawSheet(canvas, paint, !sheet.isCompact(), model.getTuning().getStringCount(),
+                    y, true, offsetBarBeat);
             keyboard.drawControls(canvas, paint);
         }
     }
@@ -73,13 +112,44 @@ public class TabView extends View implements View.OnTouchListener {
 
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
-        if (keyboardRect.contains((int) motionEvent.getX(), (int) motionEvent.getY())) {
-            Toast.makeText(context, keyboard.touch(view, motionEvent), Toast.LENGTH_LONG).show();
+        if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+            handler.postDelayed(touchScheduler, ViewConfiguration.getLongPressTimeout());
+        } else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+            if (keyboardRect.contains((int) motionEvent.getX(), (int) motionEvent.getY())) {
+                //keyboard.touch(view, motionEvent, longClick);
+                Toast.makeText(context, keyboard.touch(view, motionEvent, longClick) + (longClick ? " -L" : ""), Toast.LENGTH_LONG).show();
+            } else {
+                sheet.onTouch(motionEvent, longClick);
+            }
+            if (longClick) {
+                // Log.d("TOUCH", "LONG");
+                longClick = false;
+            } else {
+                // Log.d("TOUCH", "SHORT");
+            }
+        }
+        if ((motionEvent.getAction() == MotionEvent.ACTION_MOVE)
+                || (motionEvent.getAction() == MotionEvent.ACTION_UP)) {
+            handler.removeCallbacks(touchScheduler);
         }
         return false;
     }
 
     public TabModel getModel() {
         return model;
+    }
+
+    public boolean isInSubMenu() {
+        return keyboard.isInSubMenu();
+    }
+
+    public void showKeyboardMainMenu() {
+        keyboard.showMainMenu(this);
+    }
+
+    @Override
+    public boolean onLongClick(View view) {
+        this.longClick = true;
+        return false;
     }
 }

@@ -20,21 +20,23 @@ public class Note  {
     public static final String[] SCALE =
             {C, C_SHARP, D, D_SHARP, E, F, F_SHARP, G, G_SHARP, A, A_SHARP, B};
 
+    private  boolean isBreak;
+    private Speed speed;
     private Pitch pitch;
     private int string;
     private int fret;
-    private Speed speed;
-    private  boolean isBreak;
+    private Expression expression;
 
     public Note() {
     }
 
-    public Note(int string, int fret, Tuning tuning, Speed speed, boolean isBreak) {
+    public Note(int string, int fret, Tuning tuning, Speed speed, boolean isBreak, Expression expression) {
         this.pitch = tuning.resolve(string, fret);
         this.string = string;
         this.fret = fret;
         this.speed = speed;
         this.isBreak = isBreak;
+        this.expression = expression;
     }
 
     public Pitch getPitch() {
@@ -67,6 +69,22 @@ public class Note  {
 
     public void setSpeed(Speed speed) {
         this.speed = speed;
+    }
+
+    public boolean isBreak() {
+        return isBreak;
+    }
+
+    public void setBreak(boolean aBreak) {
+        isBreak = aBreak;
+    }
+
+    public Expression getExpression() {
+        return expression;
+    }
+
+    public void setExpression(Expression expression) {
+        this.expression = expression;
     }
 
     @Override

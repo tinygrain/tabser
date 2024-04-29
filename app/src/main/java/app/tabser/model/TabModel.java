@@ -1,8 +1,9 @@
 package app.tabser.model;
 
-import androidx.annotation.Nullable;
-
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class TabModel {
@@ -11,74 +12,28 @@ public class TabModel {
         TREBLE, BASS
     }
 
-    private Tuning tuning;
-    private String title;
-    private String artist;
-    private String album;
-    private int released;
-    private int tempo;
+    /*
+     * Song Configuration
+     */
     private Clef clef = Clef.BASS;
-    private String instrument;
+    private Tuning tuning;
     private Beat beat;
-    private ArrayList<Bar> bars = new ArrayList<>();
+    private String instrument;
+    /*
+     * Song Metadata
+     */
+    private int released;
+    private String artist;
+    private String title;
+    private String album;
+    /*
+     * Song data
+     */
+    private Map<String, Sequence> sequenceMap = new HashMap<>();
+    private List<String> sequenceOrder = new ArrayList<>();
+    private List<String> songText = new ArrayList<>();
 
     public TabModel() {
-    }
-
-    public Tuning getTuning() {
-        return tuning;
-    }
-
-    public void setTuning(Tuning tuning) {
-        this.tuning = tuning;
-    }
-
-    public ArrayList<Bar> getBars() {
-        return bars;
-    }
-
-    public void setBars(ArrayList<Bar> bars) {
-        this.bars = bars;
-    }
-
-    public String getArtist() {
-        return artist;
-    }
-
-    public void setArtist(String artist) {
-        this.artist = artist;
-    }
-
-    public String getAlbum() {
-        return album;
-    }
-
-    public void setAlbum(String album) {
-        this.album = album;
-    }
-
-    public int getReleased() {
-        return released;
-    }
-
-    public void setReleased(int released) {
-        this.released = released;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public int getTempo() {
-        return tempo;
-    }
-
-    public void setTempo(int tempo) {
-        this.tempo = tempo;
     }
 
     public Clef getClef() {
@@ -89,12 +44,12 @@ public class TabModel {
         this.clef = clef;
     }
 
-    public String getInstrument() {
-        return instrument;
+    public Tuning getTuning() {
+        return tuning;
     }
 
-    public void setInstrument(String instrument) {
-        this.instrument = instrument;
+    public void setTuning(Tuning tuning) {
+        this.tuning = tuning;
     }
 
     public Beat getBeat() {
@@ -105,7 +60,74 @@ public class TabModel {
         this.beat = beat;
     }
 
-    public boolean addNote(int string, int fret, Speed speed, int barIndex, int beatIndex, boolean autoBar) {
+    public String getInstrument() {
+        return instrument;
+    }
+
+    public void setInstrument(String instrument) {
+        this.instrument = instrument;
+    }
+
+    public int getReleased() {
+        return released;
+    }
+
+    public void setReleased(int released) {
+        this.released = released;
+    }
+
+    public String getArtist() {
+        return artist;
+    }
+
+    public void setArtist(String artist) {
+        this.artist = artist;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getAlbum() {
+        return album;
+    }
+
+    public void setAlbum(String album) {
+        this.album = album;
+    }
+
+    public Map<String, Sequence> getSequenceMap() {
+        return sequenceMap;
+    }
+
+    public void setSequenceMap(Map<String, Sequence> sequenceMap) {
+        this.sequenceMap = sequenceMap;
+    }
+
+    public List<String> getSequenceOrder() {
+        return sequenceOrder;
+    }
+
+    public void setSequenceOrder(List<String> sequenceOrder) {
+        this.sequenceOrder = sequenceOrder;
+    }
+
+    public List<String> getSongText() {
+        return songText;
+    }
+
+    public void setSongText(List<String> songText) {
+        this.songText = songText;
+    }
+
+    public boolean addNote(int string, int fret, Speed speed, int barIndex, int beatIndex,
+                           boolean autoBar, boolean insert, String sequenceKey) {
+        Sequence sequence = checkGetSequence(sequenceKey);
+        ArrayList<Bar> bars = sequence.getBars();
         Bar bar;
         if (bars.size() == 0 || beatIndex == -1 || barIndex == -1 || bars.size() < barIndex) {
             bar = new Bar();
@@ -121,8 +143,24 @@ public class TabModel {
         }
         return false;
     }
+    public ArrayList<Bar> getBars(String sequenceKey) {
+        return checkGetSequence(sequenceKey).getBars();
+    }
 
-    public void clearNote(int selectedString, int barIndex, int beatIndex) {
+    private Sequence checkGetSequence(String sequenceKey) {
+        Sequence sequence;
+        if (sequenceMap.containsKey(sequenceKey)) {
+            sequence = sequenceMap.get(sequenceKey);
+        } else {
+            sequence = new Sequence();
+            sequenceMap.put(sequenceKey, sequence);
+        }
+        return sequence;
+    }
+
+    public void clearNote(int selectedString, int barIndex, int beatIndex, String sequenceKey) {
+        Sequence sequence = checkGetSequence(sequenceKey);
+        ArrayList<Bar> bars = sequence.getBars();
         if (bars.size() > barIndex && bars.get(barIndex).getNotes().size() > beatIndex) {
             bars.get(barIndex).getNotes().get(beatIndex)[selectedString] = null;
             boolean allNull = true;
@@ -142,17 +180,22 @@ public class TabModel {
 
     }
 
-    private void createBarIfNecessary() {
+    public void addBar(String sequenceKey) {
+        Sequence sequence = checkGetSequence(sequenceKey);
+        ArrayList<Bar> bars = sequence.getBars();
+        bars.add(new Bar(beat, new ArrayList<>(), null));
+    }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TabModel tabModel = (TabModel) o;
+        return released == tabModel.released && clef == tabModel.clef && Objects.equals(tuning, tabModel.tuning) && Objects.equals(beat, tabModel.beat) && Objects.equals(instrument, tabModel.instrument) && Objects.equals(artist, tabModel.artist) && Objects.equals(title, tabModel.title) && Objects.equals(album, tabModel.album) && Objects.equals(sequenceMap, tabModel.sequenceMap) && Objects.equals(sequenceOrder, tabModel.sequenceOrder) && Objects.equals(songText, tabModel.songText);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(tuning, artist, album, released, title, tempo, clef, instrument, tuning, bars);
-    }
-
-    @Override
-    public boolean equals(@Nullable Object obj) {
-        return Objects.equals(this.hashCode(), obj.hashCode());
+        return Objects.hash(clef, tuning, beat, instrument, released, artist, title, album, sequenceMap, sequenceOrder, songText);
     }
 }

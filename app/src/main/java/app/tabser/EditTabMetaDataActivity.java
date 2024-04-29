@@ -4,10 +4,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -53,6 +57,16 @@ public class EditTabMetaDataActivity extends AppCompatActivity
         spBeat.setAdapter(beatAdapter);
         Toolbar metaToolbar = findViewById(R.id.metaToolbar);
         setSupportActionBar(metaToolbar);
+        EditText etLast = findViewById(R.id.etTabAlbum);
+        etLast.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
+                if (i == EditorInfo.IME_ACTION_DONE) {
+                    onSave(textView);
+                }
+                return false;
+            }
+        });
     }
 
     public void onCancel(View view) {
@@ -102,9 +116,11 @@ public class EditTabMetaDataActivity extends AppCompatActivity
         }
         model.setInstrument(instrument);
         model.setAlbum(etAlbum.getText().toString());
-        if (etTempo.getText().length() > 0)
-            model.setTempo(Integer.parseInt(etTempo.getText().toString()));
-
+        Spinner spBeat = findViewById(R.id.spBeat);
+        Beat beat = (Beat) spBeat.getSelectedItem();
+        if (etTempo.getText().length() > 0) {
+            beat.setTempo(Integer.parseInt(etTempo.getText().toString()));
+        }
         if (rbBassClef.isChecked()) {
             model.setClef(TabModel.Clef.BASS);
         } else {
@@ -112,8 +128,7 @@ public class EditTabMetaDataActivity extends AppCompatActivity
         }
         Tuning tuning = (Tuning) tuningAdapter.getItem(spTuning.getSelectedItemPosition());
         model.setTuning(tuning);
-        Spinner spBeat = findViewById(R.id.spBeat);
-        model.setBeat((Beat) spBeat.getSelectedItem());
+        model.setBeat(beat);
         ObjectMapper om = new ObjectMapper();
         String data = "";
         try {

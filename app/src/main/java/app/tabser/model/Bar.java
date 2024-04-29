@@ -3,7 +3,6 @@ package app.tabser.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Objects;
 
 public class Bar {
@@ -15,29 +14,19 @@ public class Bar {
         int bar = b.getBar();
         int count = 0;
         for (int i = 0; i < notes.size(); i++) {
-            Note n = Arrays.asList(notes.get(i)).stream().findFirst().orElse(null);
-            if (Objects.nonNull(n)) {
-                switch (n.getSpeed()){
-                    case FULL:
-                        return true;
-                    case HALF:
-                        count += Speed.HALF.getCm();
-                        break;
-                    case QUARTER:
-                        count += Speed.QUARTER.getCm();
-                        break;
-                    case EIGHTH:
-                        count += Speed.EIGHTH.getCm();
-                        break;
-                    case SIXTEENTH:
-                        count += Speed.SIXTEENTH.getCm();
-                        break;
-                    case THIRTY_SECOND:
-                        count += Speed.THIRTY_SECOND.getCm();
-                        break;
+            Note[] noteArray = notes.get(i);
+            Note n = null;
+            for (Note x : noteArray) {
+                if (Objects.nonNull(x)) {
+                    n = x;
+                    break;
                 }
             }
-            if(count >= bar*Speed.QUARTER.getCm()) {
+            if (Objects.nonNull(n)) {
+                count += n.getSpeed().getLength();
+            }
+
+            if (count >= bar * Speed.QUARTER.getLength()) {
                 return true;
             }
         }
@@ -92,7 +81,7 @@ public class Bar {
 
     public void addBreak(Speed speed) {
         // notes.add(new Break(speed));
-        notes.add(new Note[]{new Note(-1, -1, null, speed, true)});
+        notes.add(new Note[]{new Note(-1, -1, null, speed, true, null)});
     }
 
     public void addNote(int string, int fret, Tuning tuning, Speed speed, int beat) {
@@ -103,7 +92,7 @@ public class Bar {
         } else {
             notes = this.notes.get(beat);
         }
-        notes[string] = new Note(string, fret, tuning, speed, false);
+        notes[string] = new Note(string, fret, tuning, speed, false, Expression.PLUCK);
     }
 
     @Override

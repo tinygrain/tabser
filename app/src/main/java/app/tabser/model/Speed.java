@@ -1,16 +1,6 @@
 package app.tabser.model;
 
 public enum Speed {
-    //DOUBLE("2"),
-    /*
-
-
-
-
-
-
-
-     */
     FULL("1", 100000),
     HALF("1/2", 50000),
     QUARTER("1/4",25000),
@@ -30,7 +20,7 @@ public enum Speed {
         return signature;
     }
 
-    public int getCm() {
+    public int getLength() {
         return cm;
     }
 }

@@ -6,6 +6,7 @@ public class Beat {
     public static final Beat THREE_FOURTH = new Beat(3, 4);
     private  int bar;
     private  int count;
+    private int tempo = 100;
 
     public Beat() {
     }
@@ -29,5 +30,13 @@ public class Beat {
 
     public void setCount(int count) {
         this.count = count;
+    }
+
+    public int getTempo() {
+        return tempo;
+    }
+
+    public void setTempo(int tempo) {
+        this.tempo = tempo;
     }
 }

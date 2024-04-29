@@ -60,13 +60,13 @@ public class EditorActivity extends AppCompatActivity {
             throw new RuntimeException(e);
         }
     }
-}
-/*
-{
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_editor);
+    public void onBackPressed() {
+        if (tabView.isInSubMenu()) {
+            tabView.showKeyboardMainMenu();
+        } else {
+            super.onBackPressed();
+        }
     }
-}*/
+}

@@ -1,9 +1,16 @@
 package app.tabser.view;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.media.AudioAttributes;
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioTrack;
+import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -12,16 +19,11 @@ import app.tabser.model.Speed;
 import app.tabser.model.TabModel;
 
 class TabKeyboard {
-    private static final int BACKGROUND_COLOR = Color.BLACK;
-    private static final int FOREGROUND_COLOR_INACTIVE = Color.WHITE;
-    private static final int FOREGROUND_COLOR_ACTIVE = Color.GREEN;
-    private static final int MORE_NEXT = 0;
-    private static final int MORE_PREVIOUS = 1;
-    private static final int MORE_BREAK = 2;
-    private static final int MORE_BAR = 3;
-    private static final int MORE_COMPACT = 4;
-    private static final int MORE_META = 5;
+    private final int backgroundColor;
+    private final int foregroundColorInactive;
+    private final int foregroundColorActive;
     private final TabSheet sheet;
+    private final Design design;
 
     private enum Menu {
         MAIN, FRET, BAR, MODE
@@ -32,7 +34,7 @@ class TabKeyboard {
     private int selectedString = -1;
     private Speed[] speeds = {Speed.FULL, Speed.HALF, Speed.QUARTER, Speed.EIGHTH, Speed.SIXTEENTH, Speed.THIRTY_SECOND};
     private Rect[] speedRects = new Rect[speeds.length];
-    private int selectedSpeed = 3;
+    private int selectedSpeed;
     private String[] moreControls = {"<-", "|<-", "Start", "Bar", "Mode", "Meta"};
     private Rect[] moreRects = new Rect[moreControls.length];
     private String[] moreControls2 = {"->", "->|", "End", "Break", "Over", "View"};
@@ -58,13 +60,36 @@ class TabKeyboard {
 
     private String[] modeControls = {"Compact", "Auto-Next", "Auto-Bar", "Auto-Off Insert", "Back"};
     private Rect[] modeRects = new Rect[modeControls.length];
+
+    private String[] barMenu = {"Normal", "Double", "Double-Bold", "Repeat Start", "Repeat End", "New Beat"};
+
+    private Rect[] barRects = new Rect[barMenu.length];
+
     private Menu menu = Menu.MAIN;
     private Rect menuRect;
+
+    //private boolean insert;
     private boolean autoToggleInsert;
 
-    TabKeyboard(Rect menuRect, TabSheet sheet) {
+    private final SharedPreferences preferences;
+    private final Context context;
+
+    TabKeyboard(Rect menuRect, TabSheet sheet, Context c, Design design) {
+        this.design = design;
+        this.context = c;
+        this.foregroundColorActive = design.getForegroundColorActiveKeyboard();
+        this.foregroundColorInactive = design.getForegroundColorInactiveKeyboard();
+        this.backgroundColor = design.getBackgroundColorKeyboard();
         this.menuRect = menuRect;
         this.sheet = sheet;
+        this.preferences = c.getSharedPreferences("Keyboard", Context.MODE_PRIVATE);
+        sheet.setInsert(preferences.getBoolean("insert", false));
+        moreControls2[4] = sheet.isInsert() ? "Insert" : "Over";
+        sheet.setCompact(preferences.getBoolean("compact", false));
+        sheet.setAutoBar(preferences.getBoolean("auto-bar", false));
+        sheet.setAutoNext(preferences.getBoolean("auto-next", false));
+        autoToggleInsert = preferences.getBoolean("auto-toggle-insert", false);
+        selectedSpeed = preferences.getInt("speed", 2);
     }
 
     void loadModel(TabModel model) {
@@ -73,7 +98,7 @@ class TabKeyboard {
     }
 
     void drawControls(Canvas canvas, Paint paint) {
-        paint.setColor(BACKGROUND_COLOR);
+        paint.setColor(backgroundColor);
         canvas.drawRect(menuRect, paint);
         int menuHeight = (menuRect.bottom - menuRect.top);
         float xStart = sheet.getXStart();
@@ -82,30 +107,24 @@ class TabKeyboard {
             x = drawStrings(xStart, menuHeight, paint, canvas);
         }
         if (menu == Menu.MAIN) {
-        /*
-        float xSeparator = x - xStart / 2f;
-        float strokeWidth = sheet.getStrokeWidth();
-        paint.setStrokeWidth(strokeWidth * 2);
-        canvas.drawLine(xSeparator, menuRect.top, xSeparator, menuRect.bottom, paint);
-        */
             x = drawSpeeds(x, canvas, paint, menuHeight, xStart);
-        /*
-        xSeparator = x - xStart / 2f;
-        paint.setStrokeWidth(strokeWidth * 2);
-        canvas.drawLine(xSeparator, menuRect.top, xSeparator, menuRect.bottom, paint);
-         */
             x = drawMoreControls(x, canvas, paint, xStart, menuHeight);
             x = drawMoreControls2(x, canvas, paint, xStart, menuHeight);
+            Rect rLeftover = new Rect((int) x, menuRect.top, menuRect.right, menuRect.bottom);
+            paint.setColor(Color.CYAN);
+            //canvas.drawRect(rLeftover, paint);
         } else if (menu == Menu.FRET) {
             x = drawFrets(x, canvas, paint, xStart, menuHeight, menuRect.right);
         } else if (menu == Menu.MODE) {
             drawModes(canvas, paint, xStart, menuHeight, menuRect.right);
+        } else if (menu == Menu.BAR) {
+            drawBarMenu(canvas, paint, xStart, menuHeight, menuRect.right);
         }
     }
 
     private float drawStrings(float xStart, int menuHeight, Paint paint, Canvas canvas) {
         Pitch[] pitches = model.getTuning().getPitches();
-        //paint.setColor(FOREGROUND_COLOR_INACTIVE);
+        paint.setColor(foregroundColorInactive);
         float textSize = (menuHeight - xStart) / model.getTuning().getStringCount();
         paint.setTextSize(textSize);
         float x = xStart * 2;
@@ -118,16 +137,16 @@ class TabKeyboard {
             xMax = Math.max(xMax, textBounds.right);
             Rect strRect = new Rect((int) x, (int) y + textBounds.top, (int) x + textBounds.right, (int) y);
             if (selectedString == i) {
-                paint.setColor(FOREGROUND_COLOR_ACTIVE);
+                paint.setColor(foregroundColorActive);
             } else {
-                paint.setColor(FOREGROUND_COLOR_INACTIVE);
+                paint.setColor(foregroundColorInactive);
             }
             canvas.drawText(str, x, y, paint);
             stringRects[i] = strRect;
 
             y += textSize;
         }
-        paint.setColor(FOREGROUND_COLOR_INACTIVE);
+        paint.setColor(foregroundColorInactive);
         return x + xMax + xStart;
     }
 
@@ -150,14 +169,14 @@ class TabKeyboard {
             speedRects[i] = strRect;
             float xCentered = x + xMax / 2 - textBounds.width() / 2;
             if (selectedSpeed == i) {
-                paint.setColor(FOREGROUND_COLOR_ACTIVE);
+                paint.setColor(foregroundColorActive);
             } else {
-                paint.setColor(FOREGROUND_COLOR_INACTIVE);
+                paint.setColor(foregroundColorInactive);
             }
             canvas.drawText(str, xCentered, y, paint);
             y += textSize;
         }
-        paint.setColor(FOREGROUND_COLOR_INACTIVE);
+        paint.setColor(foregroundColorInactive);
         return x + xMax + xStart;
     }
 
@@ -180,7 +199,7 @@ class TabKeyboard {
             moreRects[i] = strRect;
             float xCentered = x + xMax / 2 - textBounds.width() / 2;
             canvas.drawText(str, xCentered, y, paint);
-            paint.setColor(FOREGROUND_COLOR_INACTIVE);
+            paint.setColor(foregroundColorInactive);
             y += textSize;
         }
         return x + xMax + xStart;
@@ -205,7 +224,7 @@ class TabKeyboard {
             moreRects2[i] = strRect;
             float xCentered = x + xMax / 2 - textBounds.width() / 2;
             canvas.drawText(str, xCentered, y, paint);
-            paint.setColor(FOREGROUND_COLOR_INACTIVE);
+            paint.setColor(foregroundColorInactive);
             y += textSize;
         }
         return x + xMax + xStart;
@@ -237,7 +256,7 @@ class TabKeyboard {
         float y = menuRect.top + textSize;
         float x = 0;
         paint.setTextSize(textSize);
-        paint.setColor(FOREGROUND_COLOR_INACTIVE);
+        paint.setColor(foregroundColorInactive);
         int xUnit = (menuWidth);
         int yUnit = (int) textSize;
         for (int yIndex = 0, n = 0; n < modeControls.length; yIndex++) {
@@ -247,23 +266,23 @@ class TabKeyboard {
             switch (yIndex) {
                 case 0:
                     // COMPACT
-                    paint.setColor(sheet.isCompact() ? FOREGROUND_COLOR_ACTIVE : FOREGROUND_COLOR_INACTIVE);
+                    paint.setColor(sheet.isCompact() ? foregroundColorActive : foregroundColorInactive);
                     break;
                 case 1:
                     // Auto Next
-                    paint.setColor(sheet.isAutoNext() ? FOREGROUND_COLOR_ACTIVE : FOREGROUND_COLOR_INACTIVE);
+                    paint.setColor(sheet.isAutoNext() ? foregroundColorActive : foregroundColorInactive);
                     break;
                 case 2:
                     // Auto Bar
-                    paint.setColor(sheet.isAutoBar() ? FOREGROUND_COLOR_ACTIVE : FOREGROUND_COLOR_INACTIVE);
+                    paint.setColor(sheet.isAutoBar() ? foregroundColorActive : foregroundColorInactive);
                     break;
                 case 3:
                     // Auto toggle ins
-                    paint.setColor(autoToggleInsert ? FOREGROUND_COLOR_ACTIVE : FOREGROUND_COLOR_INACTIVE);
+                    paint.setColor(autoToggleInsert ? foregroundColorActive : foregroundColorInactive);
                     break;
                 case 4:
                     // Back
-                    paint.setColor(FOREGROUND_COLOR_INACTIVE);
+                    paint.setColor(foregroundColorInactive);
                     break;
             }
             Rect strRect = new Rect((int) x, (int) y + yIndex * yUnit + textBounds.top,
@@ -275,7 +294,37 @@ class TabKeyboard {
         }
     }
 
-    String touch(View view, MotionEvent motionEvent) {
+    private void drawBarMenu(Canvas canvas, Paint paint, float xStart, int menuHeight, int menuWidth) {
+        float textSize = (menuHeight - xStart) / barMenu.length;
+        float y = menuRect.top + textSize;
+        float x = 0;
+        paint.setTextSize(textSize);
+        paint.setColor(foregroundColorInactive);
+        int xUnit = (menuWidth);
+        int yUnit = (int) textSize;
+        for (int yIndex = 0; yIndex < barMenu.length; yIndex++) {
+            String str = barMenu[yIndex];
+            Rect textBounds = new Rect();
+            paint.getTextBounds(str, 0, str.length(), textBounds);
+            Rect strRect = new Rect((int) x, (int) y + yIndex * yUnit + textBounds.top,
+                    (int) x + xUnit, (int) y + yIndex * yUnit);
+            barRects[yIndex] = strRect;
+            float xCentered = x + xUnit / 2 - textBounds.width() / 2;
+            canvas.drawText(str, xCentered, y + yUnit * yIndex, paint);
+        }
+    }
+
+    public boolean isInSubMenu() {
+        return menu == Menu.MODE || menu == Menu.FRET || menu == Menu.BAR;
+    }
+
+    public void showMainMenu(View view) {
+        menu = Menu.MAIN;
+        selectedString = -1;
+        view.invalidate();
+    }
+
+    String touch(View view, MotionEvent motionEvent, boolean longClick) {
         String message = "No Action";
         search:
         {
@@ -301,6 +350,9 @@ class TabKeyboard {
                     if (speedRects[i].contains((int) motionEvent.getX(), (int) motionEvent.getY())) {
                         message = speeds[i].getSignature();
                         selectedSpeed = i;
+                        SharedPreferences.Editor speedEditor = preferences.edit();
+                        speedEditor.putInt("speed", i);
+                        speedEditor.apply();
                         view.invalidate();
                         break search;
                     }
@@ -326,6 +378,12 @@ class TabKeyboard {
                                 break;
                             case 3:
                                 // BAR
+                                if (longClick) {
+                                    menu = Menu.BAR;
+                                } else {
+                                    sheet.newBar();
+                                }
+                                view.invalidate();
                                 break;
                             case 4:
                                 // MODE
@@ -364,6 +422,9 @@ class TabKeyboard {
                             case 4:
                                 // Over/Ins
                                 moreControls2[i] = sheet.toggleInsert() ? "Insert" : "Over";
+                                SharedPreferences.Editor editInsert = preferences.edit();
+                                editInsert.putBoolean("insert", sheet.isInsert());
+                                editInsert.apply();
                                 view.invalidate();
                                 break;
                             case 5:
@@ -379,14 +440,17 @@ class TabKeyboard {
                         if (fretRects[yIndex][xIndex].contains((int) motionEvent.getX(), (int) motionEvent.getY())) {
                             message = fretStrings[yIndex][xIndex];
                             if ("-".equals(message)) {
-                                model.clearNote(selectedString, sheet.getBarIndex(), sheet.getBeatIndex());
+                                model.clearNote(selectedString, sheet.getBarIndex(),
+                                        sheet.getBeatIndex(), sheet.getSequenceKey());
                             } else {
                                 int fret = -1;
                                 try {
                                     fret = Integer.parseInt(message);
                                 } catch (NumberFormatException e) {
                                 }
-                                boolean newBar = model.addNote(selectedString, fret, speeds[selectedSpeed], sheet.getBarIndex(), sheet.getBeatIndex(), sheet.isAutoBar());
+                                boolean newBar = model.addNote(selectedString, fret,
+                                        speeds[selectedSpeed], sheet.getBarIndex(), sheet.getBeatIndex(),
+                                        sheet.isAutoBar(), sheet.isInsert(), sheet.getSequenceKey());
                                 if (newBar) {
                                     sheet.nextBar();
                                 } else if (sheet.isAutoNext()) {
@@ -408,34 +472,68 @@ class TabKeyboard {
                             case 0:
                                 // COMPACT
                                 sheet.setCompact(!sheet.isCompact());
+                                SharedPreferences.Editor e = preferences.edit();
+                                e.putBoolean("compact", sheet.isCompact());
+                                e.apply();
                                 view.invalidate();
                                 break;
                             case 1:
                                 // Auto Next
                                 sheet.setAutoNext(!sheet.isAutoNext());
+                                SharedPreferences.Editor e1 = preferences.edit();
+                                e1.putBoolean("auto-next", sheet.isAutoNext());
+                                e1.apply();
                                 view.invalidate();
                                 break;
                             case 2:
                                 // Auto Bar
                                 sheet.setAutoBar(!sheet.isAutoBar());
+                                SharedPreferences.Editor e2 = preferences.edit();
+                                e2.putBoolean("auto-bar", sheet.isAutoBar());
+                                e2.apply();
                                 view.invalidate();
                                 break;
                             case 3:
                                 // Auto toggle ins
                                 this.autoToggleInsert = !this.autoToggleInsert;
+                                SharedPreferences.Editor e3 = preferences.edit();
+                                e3.putBoolean("auto-toggle-insert", this.autoToggleInsert);
+                                e3.apply();
                                 view.invalidate();
                                 break;
                             case 4:
                                 // Back
                                 menu = Menu.MAIN;
+                                ToneGenerator tg = new ToneGenerator(context);
+                                tg.play(220, 5);
                                 view.invalidate();
                                 break;
                         }
                         break search;
                     }
                 }
+            } else if (menu == Menu.BAR) {
+                for (int i = 0; i < barMenu.length; i++) {
+                    switch (i) {
+                        case 0: // Normal
+                            sheet.newBar();
+                            break;
+                        case 1:
+
+                            break;
+                        case 2:
+                            break;
+                        case 3:
+                            break;
+                        case 4:
+                            break;
+                        case 5:
+                            break;
+                    }
+                }
             }
         }
         return message;
     }
+
 }

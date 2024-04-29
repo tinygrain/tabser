@@ -36,9 +36,11 @@ jobs:
         name: ${{ env.date_today }} - ${{ env.playstore_name }} - ${{ env.repository_name }} - APK(s) debug generated
         path: ${{ env.main_project_module }}/build/outputs/apk/debug/
 
-    - name: Step 3 - Use the Upload Artifact GitHub Action
-      uses: actions/upload-artifact@v4
-      with: 
-        name: assets-for-download
-        path: ${{ env.main_project_module }}/build/outputs/apk/debug/
-
+    - name: Automatic Releases
+      uses: marvinpinto/action-automatic-releases@v1.2.1
+            
+      with:
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "Development Build"
+          files: app/build/outputs/apk/debug/*

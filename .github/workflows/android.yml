@@ -1,0 +1,37 @@
+name: Android CI
+
+env:
+  main_project_module: app
+
+on:
+  push:
+    branches: [ "apk" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    - name: Build with Gradle
+      run: ./gradlew build
+       # Create APK Debug
+    - name: Build apk debug project (APK) - ${{ env.main_project_module }} module
+      run: ./gradlew assembleDebug
+      
+    - name: Upload APK Debug - ${{ env.repository_name }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ env.date_today }} - ${{ env.playstore_name }} - ${{ env.repository_name }} - APK(s) debug generated
+        path: ${{ env.main_project_module }}/build/outputs/apk/debug/

@@ -1,7 +1,7 @@
 name: Android CI
 
 env:
-  main_project_module: Tabser
+  main_project_module: app
 
 on:
   push:

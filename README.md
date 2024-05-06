@@ -4,7 +4,7 @@ Tabbing tool for bass and guitar.
 
 ## Current
 
-[Get the APK!](releases/tag/latest)
+[Get the APK for installation](https://github.com/tinygrain/tabser/releases/tag/latest)
 
 # ToDos
 

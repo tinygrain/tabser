@@ -197,9 +197,9 @@ class TabSheet {
 
         public void setUp(SharedPreferences preferences) {
             insert = preferences.getBoolean("insert", false);
-            compact = preferences.getBoolean("compact", false);
-            autoBar = preferences.getBoolean("auto-bar", false);
-            autoNext = preferences.getBoolean("auto-next", false);
+            compact = preferences.getBoolean("compact", true);
+            autoBar = preferences.getBoolean("auto-bar", true);
+            autoNext = preferences.getBoolean("auto-next", true);
         }
 
         public boolean isInsert() {

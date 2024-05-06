@@ -60,28 +60,33 @@ public class TabViewControls {
         return yStart + height;
     }
 
-    boolean touch(MotionEvent motionEvent, boolean longClick) {
+    String touch(MotionEvent motionEvent, boolean longClick) {
+        String message = "No Action";
         for (int i = 0; i < buttonRects.length; i++) {
             if (buttonRects[i].contains((int) motionEvent.getX(), (int) motionEvent.getY())) {
                 switch (i) {
                     case 0: // play
+                        message = "Play";
                         ToneGenerator tg = new ToneGenerator(context);
                         tg.play(model);
                         break;
                     case 1: // Stop
+                        message = "Stop";
                         break;
                     case 2: // loop
+                        message = "Loop";
                         break;
                     case 3: // Speed
+                        message = "Speed";
                         break;
                     case 4: // Edit
+                        message = "Edit";
                         sheet.settings.setMode(TabSheet.Mode.EDIT);
                         tabView.invalidate();
                         break;
                 }
-                return true;
             }
         }
-        return false;
+        return message;
     }
 }

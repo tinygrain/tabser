@@ -1,5 +1,6 @@
 package app.tabser.view;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
@@ -11,6 +12,8 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.view.MotionEvent;
+
+import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -89,36 +92,36 @@ class TabSheet {
         }
     }
 
-    final class Navigation {
+    final class Navigation implements ValueAnimator.AnimatorUpdateListener {
+        private int animationStart;
+        private ValueAnimator animator;
+
+        @Override
+        public void onAnimationUpdate(@NonNull ValueAnimator valueAnimator) {
+            int value = (int) valueAnimator.getAnimatedValue();
+            deltaY = animationStart + value;
+            tabView.invalidate();
+        }
+
+        void startAnimation(int yDelta1, int yDelta2) {
+            animationStart = deltaY;
+            int animationGoal = yDelta2 - yDelta1;
+            animator = ValueAnimator.ofInt(0, animationGoal);
+            animator.setDuration(design.getAnimationDuration() * Math.abs((long) (animationGoal / lineHeight)));
+            //animator.setDuration(design.getAnimationDuration());
+            animator.addUpdateListener(this);
+            animator.start();
+        }
+
         void scrollToLine(int lineIndex, long animationTime) {
             float deltaY1 = deltaY;
             float deltaY2 = -(headerHeight + lineIndex * lineHeight);
-            long frameLength = 50L;
-            float distance = deltaY2 - deltaY1;
-            float increment = distance / animationTime * frameLength;
-            boolean down = deltaY2 > deltaY1;
-            int nSteps = (int) (animationTime / frameLength);
-            float[] progress = {0f};
-            new Thread(() -> {
-                for (long i = 0; i < nSteps; i++) {
-                    progress[0] = i * increment;
-                    deltaY = (int) (deltaY1 + progress[0]);
-                    tabView.invalidate();
-                    try {
-                        Thread.sleep(frameLength);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                deltaY = (int) deltaY2;
-                tabView.invalidate();
-            }).start();
+            startAnimation((int) deltaY1, (int) deltaY2);
         }
 
         public void start() {
             modelCursor.barIndex = 0;
             modelCursor.beatIndex = 0;
-            //scrollToLine(0, design.getAnimationDuration());
         }
 
         public void previousBeat() {
@@ -170,7 +173,6 @@ class TabSheet {
             if (model.getBars(modelCursor.sequenceKey).size() > 0) {
                 modelCursor.barIndex = model.getBars(modelCursor.sequenceKey).size() - 1;
                 modelCursor.beatIndex = model.getBars(modelCursor.sequenceKey).get(modelCursor.barIndex).size();
-                //scrollToLine(lineCount - 1, design.getAnimationDuration());
             }
         }
 
@@ -280,10 +282,10 @@ class TabSheet {
         this.model = model;
     }
 
-    void drawSheet(Canvas canvas, Paint paint) {
+    void drawSheet(Canvas canvas, Paint paint, boolean dragging) {
         RenderResult renderResult = new RenderResult();
         renderResult.yPosition = deltaY;
-        renderResult.lineOffset =0;
+        renderResult.lineOffset = 0;
         renderResult.cursorPositions = new ArrayList<>();
         lineCount = 0;
         lineHeight = 0;
@@ -313,7 +315,7 @@ class TabSheet {
             canvas.drawRect(modelCursor.selectionArea, paint);
             //paint.setStyle(Paint.Style.FILL);
         }
-        if (!viewPort.contains(modelCursor.selectionArea)) {
+        if ((Objects.isNull(nav.animator) || !nav.animator.isRunning()) && !viewPort.contains(modelCursor.selectionArea)) {
             nav.scrollToLine(modelCursor.lineIndex, design.getAnimationDuration());
         }
     }
@@ -342,7 +344,7 @@ class TabSheet {
                 canvas.drawLine(xStart, yCursor, tabView.getTabViewWidth() - xStart, yCursor, paint);
                 yCursor += yIncrement;
             }
-            int clefStart = drawClef(canvas, paint, model.getClef(), renderResult.yPosition);
+            int clefStart = drawClef(canvas, paint, model.getClef(), yStart);
             yCursor += 3 * yIncrement;
             xCursor = 2 * xStart + clefStart + xStart;
         }
@@ -511,13 +513,15 @@ class TabSheet {
         return modelCursor;
     }
 
-    void setViewPort(int left, int top, int right, int bottom){
+    void setViewPort(int left, int top, int right, int bottom) {
         viewPort.set(left, top, right, bottom);
     }
-    void onTouch(MotionEvent event, boolean longClick) {
+
+    String onTouch(MotionEvent event, boolean longClick) {
         int x = (int) event.getX();
         int y = (int) event.getY();
         ModelCursor tmpModelCursor = null;
+        String message = "No Action";
         if (Objects.nonNull(displayedCursorPositions)) {
             for (ModelCursor c : displayedCursorPositions) {
                 if (c.selectionArea.contains(x, y)) {
@@ -527,11 +531,14 @@ class TabSheet {
             }
             if (Objects.isNull(tmpModelCursor)) {
                 nav.end();
+                message = "End";
             } else {
                 modelCursor = tmpModelCursor;
+                message = "Cursor: bar(" + modelCursor.barIndex + ") / beat(" + modelCursor.beatIndex + ")";
             }
             tabView.invalidate();
         }
+        return message;
     }
 
     public void startMove() {
@@ -543,9 +550,6 @@ class TabSheet {
         deltaY = initialY + (pointTo.y - downY);
         float yMax = 0f;
         deltaY = Math.min((int) yMax, deltaY);
-        /*
-         * TODO Debug yMin
-         */
         float yMin = ((lineCount - 1) * lineHeight) * -1;
         deltaY = Math.max((int) yMin, deltaY);
         tabView.invalidate();

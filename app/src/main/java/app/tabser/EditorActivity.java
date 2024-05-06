@@ -29,9 +29,10 @@ public class EditorActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
         fileName = getIntent().getStringExtra("fileName");
+        String mode = getIntent().getStringExtra("mode");
         tabView = findViewById(R.id.tabView);
         try(InputStream in = openFileInput(fileName)){
-            tabView.loadModel(new ObjectMapper().readValue(in, TabModel.class));
+            tabView.loadModel(mode, new ObjectMapper().readValue(in, TabModel.class));
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {

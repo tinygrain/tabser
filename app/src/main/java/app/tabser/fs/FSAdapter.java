@@ -58,6 +58,7 @@ public class FSAdapter extends BaseAdapter {
         view.setOnClickListener(v -> {
             Intent editorIntent = new Intent(activity, EditorActivity.class);
             editorIntent.putExtra("fileName", fileName);
+            editorIntent.putExtra("mode", "VIEW");
             activity.startActivity(editorIntent);
         });
         return view;

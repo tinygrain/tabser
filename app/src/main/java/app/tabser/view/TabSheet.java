@@ -195,9 +195,9 @@ class TabSheet {
 
         public void setUp(SharedPreferences preferences) {
             insert = preferences.getBoolean("insert", false);
-            compact = preferences.getBoolean("compact", false);
-            autoBar = preferences.getBoolean("auto-bar", false);
-            autoNext = preferences.getBoolean("auto-next", false);
+            compact = preferences.getBoolean("compact", true);
+            autoBar = preferences.getBoolean("auto-bar", true);
+            autoNext = preferences.getBoolean("auto-next", true);
         }
 
         public boolean isInsert() {
@@ -342,7 +342,7 @@ class TabSheet {
                 canvas.drawLine(xStart, yCursor, tabView.getTabViewWidth() - xStart, yCursor, paint);
                 yCursor += yIncrement;
             }
-            int clefStart = drawClef(canvas, paint, model.getClef(), renderResult.yPosition);
+            int clefStart = drawClef(canvas, paint, model.getClef(), yStart);
             yCursor += 3 * yIncrement;
             xCursor = 2 * xStart + clefStart + xStart;
         }

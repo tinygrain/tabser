@@ -1,15 +1,19 @@
 package app.tabser.model;
 
+import android.content.Context;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import app.tabser.view.ToneGenerator;
+
 public class TabModel {
 
     public static enum Clef {
-        TREBLE, BASS
+        TREBLE, TAB, BASS
     }
 
     /*
@@ -124,8 +128,8 @@ public class TabModel {
         this.songText = songText;
     }
 
-    public boolean addNote(int string, int fret, Speed speed, int barIndex, int beatIndex,
-                           boolean autoBar, boolean insert, String sequenceKey) {
+    public boolean addNote(int string, int fret, Length speed, int barIndex, int beatIndex,
+                           boolean autoBar, boolean insert, String sequenceKey, Context context) {
         Sequence sequence = checkGetSequence(sequenceKey);
         ArrayList<Bar> bars = sequence.getBars();
         Bar bar;
@@ -135,7 +139,9 @@ public class TabModel {
         } else {
             bar = bars.get(barIndex);
         }
-        bar.addNote(string, fret, tuning, speed, beatIndex);
+        Note n = bar.addNote(string, fret, tuning, speed, beatIndex);
+        ToneGenerator tg = new ToneGenerator(context);
+        tg.play(n.getPitch().getFrequency(), 2);
         if (autoBar && bar.isComplete(beat)) {
             bar.setSeparator(Bar.SeparatorBar.NORMAL);
             bars.add(new Bar());
@@ -176,7 +182,7 @@ public class TabModel {
         }
     }
 
-    public void addBreak(Speed speed) {
+    public void addBreak(Length speed) {
 
     }
 

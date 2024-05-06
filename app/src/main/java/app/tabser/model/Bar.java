@@ -5,33 +5,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.Objects;
 
+import app.tabser.view.ToneGenerator;
+
 public class Bar {
-
-    public boolean isComplete(Beat b) {
-        if (beat != Beat.INHERIT) {
-            b = beat;
-        }
-        int bar = b.getBar();
-        int count = 0;
-        for (int i = 0; i < notes.size(); i++) {
-            Note[] noteArray = notes.get(i);
-            Note n = null;
-            for (Note x : noteArray) {
-                if (Objects.nonNull(x)) {
-                    n = x;
-                    break;
-                }
-            }
-            if (Objects.nonNull(n)) {
-                count += n.getSpeed().getLength();
-            }
-
-            if (count >= bar * Speed.QUARTER.getLength()) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     public enum SeparatorBar {
         NORMAL, BOLD, REPEAT_START, REPEAT_END,
@@ -79,12 +55,13 @@ public class Bar {
         return notes.size();
     }
 
-    public void addBreak(Speed speed) {
+    public void addBreak(Length length) {
         // notes.add(new Break(speed));
-        notes.add(new Note[]{new Note(-1, -1, null, speed, true, null)});
+        notes.add(new Note[]{new Note(-1, -1, null, length,
+                true, null)});
     }
 
-    public void addNote(int string, int fret, Tuning tuning, Speed speed, int beat) {
+    public Note addNote(int string, int fret, Tuning tuning, Length length, int beat) {
         Note[] notes;
         if (beat == -1 || beat >= this.notes.size()) {
             notes = new Note[tuning.getStringCount()];
@@ -92,7 +69,33 @@ public class Bar {
         } else {
             notes = this.notes.get(beat);
         }
-        notes[string] = new Note(string, fret, tuning, speed, false, Expression.PLUCK);
+        notes[string] = new Note(string, fret, tuning, length, false, Expression.PLUCK);
+        return notes[string];
+    }
+
+    public boolean isComplete(Beat b) {
+        if (!Beat.INHERIT.equals(beat)) {
+            b = beat;
+        }
+        int bar = b.getBar();
+        int count = 0;
+        for (int i = 0; i < notes.size(); i++) {
+            Note[] noteArray = notes.get(i);
+            Note n = null;
+            for (Note x : noteArray) {
+                if (Objects.nonNull(x)) {
+                    n = x;
+                    break;
+                }
+            }
+            if (Objects.nonNull(n)) {
+                count += n.getLength().getLength();
+            }
+            if (count >= bar * Length.QUARTER.getLength()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -100,7 +103,8 @@ public class Bar {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Bar bar = (Bar) o;
-        return Objects.equals(beat, bar.beat) && Objects.equals(notes, bar.notes) && separator == bar.separator;
+        return Objects.equals(beat, bar.beat) && Objects.equals(notes, bar.notes)
+                && separator == bar.separator;
     }
 
     @Override

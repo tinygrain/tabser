@@ -20,6 +20,11 @@ public class Design {
             Color.CYAN, Color.BLUE, Color.MAGENTA
     );
 
+    private final float strokeWidth = 5f;
+    private final float yIncrement = 50f;
+    private final float yStart = yIncrement * 2;
+    private final float xStart = 25f;
+
     private final int backgroundColorKeyboard;
     private final int foregroundColorInactiveKeyboard;
     private final int foregroundColorActiveKeyboard;
@@ -36,6 +41,22 @@ public class Design {
         this.backgroundColorSheet = backgroundColorSheet;
         this.foregroundColorInactiveSheet = foregroundColorInactiveSheet;
         this.foregroundColorActiveSheet = foregroundColorActiveSheet;
+    }
+
+    public float getStrokeWidth() {
+        return strokeWidth;
+    }
+
+    public float getYIncrement() {
+        return yIncrement;
+    }
+
+    public float getYStart() {
+        return yStart;
+    }
+
+    public float getxStart() {
+        return xStart;
     }
 
     public int getBackgroundColorKeyboard() {

@@ -21,7 +21,7 @@ public class Note  {
             {C, C_SHARP, D, D_SHARP, E, F, F_SHARP, G, G_SHARP, A, A_SHARP, B};
 
     private  boolean isBreak;
-    private Speed speed;
+    private Length length;
     private Pitch pitch;
     private int string;
     private int fret;
@@ -30,11 +30,11 @@ public class Note  {
     public Note() {
     }
 
-    public Note(int string, int fret, Tuning tuning, Speed speed, boolean isBreak, Expression expression) {
+    public Note(int string, int fret, Tuning tuning, Length speed, boolean isBreak, Expression expression) {
         this.pitch = tuning.resolve(string, fret);
         this.string = string;
         this.fret = fret;
-        this.speed = speed;
+        this.length = speed;
         this.isBreak = isBreak;
         this.expression = expression;
     }
@@ -63,12 +63,12 @@ public class Note  {
         this.fret = fret;
     }
 
-    public Speed getSpeed() {
-        return speed;
+    public Length getLength() {
+        return length;
     }
 
-    public void setSpeed(Speed speed) {
-        this.speed = speed;
+    public void setLength(Length length) {
+        this.length = length;
     }
 
     public boolean isBreak() {

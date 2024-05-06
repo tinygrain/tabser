@@ -6,22 +6,14 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.media.AudioAttributes;
-import android.media.AudioFormat;
-import android.media.AudioManager;
-import android.media.AudioTrack;
-import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
 
 import app.tabser.model.Pitch;
-import app.tabser.model.Speed;
+import app.tabser.model.Length;
 import app.tabser.model.TabModel;
 
 class TabKeyboard {
-    private final int backgroundColor;
-    private final int foregroundColorInactive;
-    private final int foregroundColorActive;
     private final TabSheet sheet;
     private final Design design;
 
@@ -32,9 +24,9 @@ class TabKeyboard {
     private TabModel model;
     private Rect[] stringRects;
     private int selectedString = -1;
-    private Speed[] speeds = {Speed.FULL, Speed.HALF, Speed.QUARTER, Speed.EIGHTH, Speed.SIXTEENTH, Speed.THIRTY_SECOND};
-    private Rect[] speedRects = new Rect[speeds.length];
-    private int selectedSpeed;
+    private Length[] lengths = {Length.FULL, Length.HALF, Length.QUARTER, Length.EIGHTH, Length.SIXTEENTH, Length.THIRTY_SECOND};
+    private Rect[] lengthRects = new Rect[lengths.length];
+    private int selectedLength;
     private String[] moreControls = {"<-", "|<-", "Start", "Bar", "Mode", "Meta"};
     private Rect[] moreRects = new Rect[moreControls.length];
     private String[] moreControls2 = {"->", "->|", "End", "Break", "Over", "View"};
@@ -77,19 +69,13 @@ class TabKeyboard {
     TabKeyboard(Rect menuRect, TabSheet sheet, Context c, Design design) {
         this.design = design;
         this.context = c;
-        this.foregroundColorActive = design.getForegroundColorActiveKeyboard();
-        this.foregroundColorInactive = design.getForegroundColorInactiveKeyboard();
-        this.backgroundColor = design.getBackgroundColorKeyboard();
         this.menuRect = menuRect;
         this.sheet = sheet;
         this.preferences = c.getSharedPreferences("Keyboard", Context.MODE_PRIVATE);
-        sheet.setInsert(preferences.getBoolean("insert", false));
-        moreControls2[4] = sheet.isInsert() ? "Insert" : "Over";
-        sheet.setCompact(preferences.getBoolean("compact", false));
-        sheet.setAutoBar(preferences.getBoolean("auto-bar", false));
-        sheet.setAutoNext(preferences.getBoolean("auto-next", false));
+        sheet.settings.setUp(preferences);
+        moreControls2[4] = sheet.settings.isInsert() ? "Insert" : "Over";
         autoToggleInsert = preferences.getBoolean("auto-toggle-insert", false);
-        selectedSpeed = preferences.getInt("speed", 2);
+        selectedLength = preferences.getInt("speed", 2);
     }
 
     void loadModel(TabModel model) {
@@ -98,18 +84,19 @@ class TabKeyboard {
     }
 
     void drawControls(Canvas canvas, Paint paint) {
-        paint.setColor(backgroundColor);
+        paint.setColor(design.getBackgroundColorKeyboard());
         canvas.drawRect(menuRect, paint);
         int menuHeight = (menuRect.bottom - menuRect.top);
-        float xStart = sheet.getXStart();
+        float xStart = design.getxStart();
         float x = xStart;
         if (menu == Menu.MAIN || menu == Menu.FRET) {
             x = drawStrings(xStart, menuHeight, paint, canvas);
         }
         if (menu == Menu.MAIN) {
-            x = drawSpeeds(x, canvas, paint, menuHeight, xStart);
-            x = drawMoreControls(x, canvas, paint, xStart, menuHeight);
-            x = drawMoreControls2(x, canvas, paint, xStart, menuHeight);
+            x = drawLengths(x, canvas, paint, menuHeight, xStart);
+            float width = (menuRect.right - xStart - x) / 2;
+            x = drawMoreControlsColumn1(x, canvas, paint, xStart, menuHeight, width);
+            x = drawMoreControlsColumn2(x, canvas, paint, xStart, menuHeight, width);
             Rect rLeftover = new Rect((int) x, menuRect.top, menuRect.right, menuRect.bottom);
             paint.setColor(Color.CYAN);
             //canvas.drawRect(rLeftover, paint);
@@ -124,7 +111,7 @@ class TabKeyboard {
 
     private float drawStrings(float xStart, int menuHeight, Paint paint, Canvas canvas) {
         Pitch[] pitches = model.getTuning().getPitches();
-        paint.setColor(foregroundColorInactive);
+        paint.setColor(design.getForegroundColorInactiveKeyboard());
         float textSize = (menuHeight - xStart) / model.getTuning().getStringCount();
         paint.setTextSize(textSize);
         float x = xStart * 2;
@@ -137,97 +124,83 @@ class TabKeyboard {
             xMax = Math.max(xMax, textBounds.right);
             Rect strRect = new Rect((int) x, (int) y + textBounds.top, (int) x + textBounds.right, (int) y);
             if (selectedString == i) {
-                paint.setColor(foregroundColorActive);
+                paint.setColor(design.getForegroundColorActiveKeyboard());
             } else {
-                paint.setColor(foregroundColorInactive);
+                paint.setColor(design.getForegroundColorInactiveKeyboard());
             }
             canvas.drawText(str, x, y, paint);
             stringRects[i] = strRect;
 
             y += textSize;
         }
-        paint.setColor(foregroundColorInactive);
-        return x + xMax + xStart;
+        paint.setColor(design.getForegroundColorInactiveKeyboard());
+        return x + xMax + xStart * 2;
     }
 
-    private float drawSpeeds(float x, Canvas canvas, Paint paint, float menuHeight, float xStart) {
-        float textSize = (menuHeight - xStart) / speeds.length;
+    private float drawLengths(float x, Canvas canvas, Paint paint, float menuHeight, float xStart) {
+        float textSize = (menuHeight - xStart) / lengths.length;
         float y = menuRect.top + textSize;
         paint.setTextSize(textSize);
         int xMax = 0;
-        for (int i = 0; i < speeds.length; i++) {
+        for (int i = 0; i < lengths.length; i++) {
             Rect textBounds = new Rect();
-            String str = speeds[i].getSignature();
+            String str = lengths[i].getSignature();
             paint.getTextBounds(str, 0, str.length(), textBounds);
             xMax = Math.max(xMax, textBounds.right);
         }
-        for (int i = 0; i < speeds.length; i++) {
+        for (int i = 0; i < lengths.length; i++) {
             Rect textBounds = new Rect();
-            String str = speeds[i].getSignature();
+            String str = lengths[i].getSignature();
             paint.getTextBounds(str, 0, str.length(), textBounds);
             Rect strRect = new Rect((int) x, (int) y + textBounds.top, (int) x + xMax, (int) y);
-            speedRects[i] = strRect;
+            lengthRects[i] = strRect;
             float xCentered = x + xMax / 2 - textBounds.width() / 2;
-            if (selectedSpeed == i) {
-                paint.setColor(foregroundColorActive);
+            if (selectedLength == i) {
+                paint.setColor(design.getForegroundColorActiveKeyboard());
             } else {
-                paint.setColor(foregroundColorInactive);
+                paint.setColor(design.getForegroundColorInactiveKeyboard());
             }
             canvas.drawText(str, xCentered, y, paint);
             y += textSize;
         }
-        paint.setColor(foregroundColorInactive);
+        paint.setColor(design.getForegroundColorInactiveKeyboard());
         return x + xMax + xStart;
     }
 
-    private float drawMoreControls(float x, Canvas canvas, Paint paint, float xStart, int menuHeight) {
+    private float drawMoreControlsColumn1(float x, Canvas canvas, Paint paint, float xStart, int menuHeight, float width) {
         float textSize = (menuHeight - xStart) / moreControls.length;
         float y = menuRect.top + textSize;
         paint.setTextSize(textSize);
-        int xMax = 0;
         for (int i = 0; i < moreControls.length; i++) {
             Rect textBounds = new Rect();
             String str = moreControls[i];
             paint.getTextBounds(str, 0, str.length(), textBounds);
-            xMax = Math.max(xMax, textBounds.right);
-        }
-        for (int i = 0; i < moreControls.length; i++) {
-            Rect textBounds = new Rect();
-            String str = moreControls[i];
-            paint.getTextBounds(str, 0, str.length(), textBounds);
-            Rect strRect = new Rect((int) x, (int) y + textBounds.top, (int) x + xMax, (int) y);
+            Rect strRect = new Rect((int) x, (int) (y - textSize), (int) (x + width), (int) y);
             moreRects[i] = strRect;
-            float xCentered = x + xMax / 2 - textBounds.width() / 2;
+            float xCentered = x + width / 2 - textBounds.width() / 2f;
             canvas.drawText(str, xCentered, y, paint);
-            paint.setColor(foregroundColorInactive);
+            paint.setColor(design.getForegroundColorInactiveKeyboard());
             y += textSize;
         }
-        return x + xMax + xStart;
+        return x + width + xStart;
     }
 
-    private float drawMoreControls2(float x, Canvas canvas, Paint paint, float xStart, int menuHeight) {
+    private float drawMoreControlsColumn2(float x, Canvas canvas, Paint paint, float xStart, int menuHeight, float width) {
         float textSize = (menuHeight - xStart) / moreControls2.length;
         float y = menuRect.top + textSize;
         paint.setTextSize(textSize);
-        int xMax = 0;
         for (int i = 0; i < moreControls2.length; i++) {
             Rect textBounds = new Rect();
             String str = moreControls2[i];
             paint.getTextBounds(str, 0, str.length(), textBounds);
-            xMax = Math.max(xMax, textBounds.right);
-        }
-        for (int i = 0; i < moreControls2.length; i++) {
-            Rect textBounds = new Rect();
-            String str = moreControls2[i];
-            paint.getTextBounds(str, 0, str.length(), textBounds);
-            Rect strRect = new Rect((int) x, (int) y + textBounds.top, (int) x + xMax, (int) y);
+            Rect strRect = new Rect((int) x, (int) (y - textSize), (int) (x + width), (int) y);
             moreRects2[i] = strRect;
-            float xCentered = x + xMax / 2 - textBounds.width() / 2;
+            float xCentered = x + width / 2 - textBounds.width() / 2f;
             canvas.drawText(str, xCentered, y, paint);
-            paint.setColor(foregroundColorInactive);
+            paint.setColor(design.getForegroundColorInactiveKeyboard());
             y += textSize;
         }
-        return x + xMax + xStart;
+        return x + width + xStart;
     }
 
     private float drawFrets(float x, Canvas canvas, Paint paint, float xStart, int menuHeight, int menuWidth) {
@@ -256,6 +229,8 @@ class TabKeyboard {
         float y = menuRect.top + textSize;
         float x = 0;
         paint.setTextSize(textSize);
+        int foregroundColorInactive = design.getForegroundColorInactiveKeyboard();
+        int foregroundColorActive = design.getForegroundColorActiveKeyboard();
         paint.setColor(foregroundColorInactive);
         int xUnit = (menuWidth);
         int yUnit = (int) textSize;
@@ -266,15 +241,15 @@ class TabKeyboard {
             switch (yIndex) {
                 case 0:
                     // COMPACT
-                    paint.setColor(sheet.isCompact() ? foregroundColorActive : foregroundColorInactive);
+                    paint.setColor(sheet.settings.isCompact() ? foregroundColorActive : foregroundColorInactive);
                     break;
                 case 1:
                     // Auto Next
-                    paint.setColor(sheet.isAutoNext() ? foregroundColorActive : foregroundColorInactive);
+                    paint.setColor(sheet.settings.isAutoNext() ? foregroundColorActive : foregroundColorInactive);
                     break;
                 case 2:
                     // Auto Bar
-                    paint.setColor(sheet.isAutoBar() ? foregroundColorActive : foregroundColorInactive);
+                    paint.setColor(sheet.settings.isAutoBar() ? foregroundColorActive : foregroundColorInactive);
                     break;
                 case 3:
                     // Auto toggle ins
@@ -299,7 +274,7 @@ class TabKeyboard {
         float y = menuRect.top + textSize;
         float x = 0;
         paint.setTextSize(textSize);
-        paint.setColor(foregroundColorInactive);
+        paint.setColor(design.getForegroundColorInactiveKeyboard());
         int xUnit = (menuWidth);
         int yUnit = (int) textSize;
         for (int yIndex = 0; yIndex < barMenu.length; yIndex++) {
@@ -346,10 +321,10 @@ class TabKeyboard {
             }
 
             if (menu == Menu.MAIN) {
-                for (int i = 0; i < speedRects.length; i++) {
-                    if (speedRects[i].contains((int) motionEvent.getX(), (int) motionEvent.getY())) {
-                        message = speeds[i].getSignature();
-                        selectedSpeed = i;
+                for (int i = 0; i < lengthRects.length; i++) {
+                    if (lengthRects[i].contains((int) motionEvent.getX(), (int) motionEvent.getY())) {
+                        message = lengths[i].getSignature();
+                        selectedLength = i;
                         SharedPreferences.Editor speedEditor = preferences.edit();
                         speedEditor.putInt("speed", i);
                         speedEditor.apply();
@@ -363,17 +338,17 @@ class TabKeyboard {
                         switch (i) {
                             case 0:
                                 // PREVIOUS
-                                sheet.previousBeat();
+                                sheet.nav.previousBeat();
                                 view.invalidate();
                                 break;
                             case 1:
                                 // Prev. Bar
-                                sheet.previousBar();
+                                sheet.nav.previousBar();
                                 view.invalidate();
                                 break;
                             case 2:
                                 // START
-                                sheet.start();
+                                sheet.nav.start();
                                 view.invalidate();
                                 break;
                             case 3:
@@ -381,7 +356,7 @@ class TabKeyboard {
                                 if (longClick) {
                                     menu = Menu.BAR;
                                 } else {
-                                    sheet.newBar();
+                                    sheet.nav.newBar();
                                 }
                                 view.invalidate();
                                 break;
@@ -403,17 +378,17 @@ class TabKeyboard {
                         switch (i) {
                             case 0:
                                 // NEXT
-                                sheet.nextBeat();
+                                sheet.nav.nextBeat();
                                 view.invalidate();
                                 break;
                             case 1:
                                 // NEXT Bar
-                                sheet.nextBar();
+                                sheet.nav.nextBar();
                                 view.invalidate();
                                 break;
                             case 2:
                                 // END
-                                sheet.end();
+                                sheet.nav.end();
                                 view.invalidate();
                                 break;
                             case 3:
@@ -421,14 +396,16 @@ class TabKeyboard {
                                 break;
                             case 4:
                                 // Over/Ins
-                                moreControls2[i] = sheet.toggleInsert() ? "Insert" : "Over";
+                                moreControls2[i] = sheet.settings.toggleInsert() ? "Insert" : "Over";
                                 SharedPreferences.Editor editInsert = preferences.edit();
-                                editInsert.putBoolean("insert", sheet.isInsert());
+                                editInsert.putBoolean("insert", sheet.settings.isInsert());
                                 editInsert.apply();
                                 view.invalidate();
                                 break;
                             case 5:
                                 // VIEW
+                                sheet.settings.setMode(TabSheet.Mode.VIEW);
+                                view.invalidate();
                                 break;
                         }
                         break search;
@@ -440,21 +417,22 @@ class TabKeyboard {
                         if (fretRects[yIndex][xIndex].contains((int) motionEvent.getX(), (int) motionEvent.getY())) {
                             message = fretStrings[yIndex][xIndex];
                             if ("-".equals(message)) {
-                                model.clearNote(selectedString, sheet.getBarIndex(),
-                                        sheet.getBeatIndex(), sheet.getSequenceKey());
+                                TabSheet.ModelCursor mc = sheet.getModelCursor();
+                                model.clearNote(selectedString, mc.barIndex, mc.beatIndex, mc.sequenceKey);
                             } else {
                                 int fret = -1;
                                 try {
                                     fret = Integer.parseInt(message);
                                 } catch (NumberFormatException e) {
                                 }
+                                TabSheet.ModelCursor mc = sheet.getModelCursor();
                                 boolean newBar = model.addNote(selectedString, fret,
-                                        speeds[selectedSpeed], sheet.getBarIndex(), sheet.getBeatIndex(),
-                                        sheet.isAutoBar(), sheet.isInsert(), sheet.getSequenceKey());
+                                        lengths[selectedLength], mc.barIndex, mc.beatIndex,
+                                        sheet.settings.isAutoBar(), sheet.settings.isInsert(), mc.sequenceKey, context);
                                 if (newBar) {
-                                    sheet.nextBar();
-                                } else if (sheet.isAutoNext()) {
-                                    sheet.nextBeat();
+                                    sheet.nav.nextBar();
+                                } else if (sheet.settings.isAutoNext()) {
+                                    sheet.nav.nextBeat();
                                 }
                             }
                             menu = Menu.MAIN;
@@ -471,25 +449,22 @@ class TabKeyboard {
                         switch (i) {
                             case 0:
                                 // COMPACT
-                                sheet.setCompact(!sheet.isCompact());
                                 SharedPreferences.Editor e = preferences.edit();
-                                e.putBoolean("compact", sheet.isCompact());
+                                e.putBoolean("compact", sheet.settings.toggleCompact());
                                 e.apply();
                                 view.invalidate();
                                 break;
                             case 1:
                                 // Auto Next
-                                sheet.setAutoNext(!sheet.isAutoNext());
                                 SharedPreferences.Editor e1 = preferences.edit();
-                                e1.putBoolean("auto-next", sheet.isAutoNext());
+                                e1.putBoolean("auto-next", sheet.settings.toggleAutoNext());
                                 e1.apply();
                                 view.invalidate();
                                 break;
                             case 2:
                                 // Auto Bar
-                                sheet.setAutoBar(!sheet.isAutoBar());
                                 SharedPreferences.Editor e2 = preferences.edit();
-                                e2.putBoolean("auto-bar", sheet.isAutoBar());
+                                e2.putBoolean("auto-bar", sheet.settings.toggleAutoBar());
                                 e2.apply();
                                 view.invalidate();
                                 break;
@@ -504,8 +479,6 @@ class TabKeyboard {
                             case 4:
                                 // Back
                                 menu = Menu.MAIN;
-                                ToneGenerator tg = new ToneGenerator(context);
-                                tg.play(220, 5);
                                 view.invalidate();
                                 break;
                         }
@@ -516,10 +489,9 @@ class TabKeyboard {
                 for (int i = 0; i < barMenu.length; i++) {
                     switch (i) {
                         case 0: // Normal
-                            sheet.newBar();
+                            sheet.nav.newBar();
                             break;
                         case 1:
-
                             break;
                         case 2:
                             break;

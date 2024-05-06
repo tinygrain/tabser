@@ -7,14 +7,22 @@ import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.os.Handler;
 
-class ToneGenerator {
+import java.util.List;
+import java.util.Objects;
+
+import app.tabser.model.Bar;
+import app.tabser.model.Note;
+import app.tabser.model.Sequence;
+import app.tabser.model.TabModel;
+
+public class ToneGenerator {
     private final int sampleRate = 44100;
     private final AudioAttributes audioAttributes;
     private final AudioFormat audioFormat;
     private final Handler handler = new Handler();
     private final String rate;
 
-    ToneGenerator(Context context) {
+    public ToneGenerator(Context context) {
         AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         this.rate = audioManager.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE);
         this.audioAttributes = new AudioAttributes.Builder()
@@ -28,11 +36,11 @@ class ToneGenerator {
                 .build();
     }
 
-    void play(double freqOfTone, double duration) {
+    public void play(double freqOfTone, double duration) {
         playSound(genTone(freqOfTone, duration), (int) (duration * sampleRate));
     }
 
-    void playAsync(double freqOfTone, int duration) {
+    public void playAsync(double freqOfTone, int duration) {
         // Use a new tread as this can take a while
         final Thread thread = new Thread(new Runnable() {
             public void run() {
@@ -48,7 +56,7 @@ class ToneGenerator {
 
     private byte[] genTone(double freqOfTone, double duration) {
         // fill out the array
-        int numSamples =(int)( duration * sampleRate);
+        int numSamples = (int) (duration * sampleRate);
         double[] sample = new double[numSamples];
         ;
         for (int i = 0; i < numSamples; ++i) {
@@ -78,10 +86,27 @@ class ToneGenerator {
                 0);
         audioTrack.write(generatedSnd, 0, generatedSnd.length);
         audioTrack.play();
-        audioTrack.stop();
+        //audioTrack.stop();
+    }
+
+    public void play(TabModel model) {
+        for (Bar bar : model.getBars(Sequence.DEFAULT_HIDDEN_SEQUENCE_NAME)) {
+            for (Note[] notes : bar.getNotes()) {
+                for (Note n : notes) {
+                    if (Objects.nonNull(n)) {
+                        play(n.getPitch().getFrequency(), 2);
+                    }
+                }
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
     }
 /*
-    private static int sampleRate = 44100;
+    private static int sampleRate = 4410void0;
     private final int duration = 1; // seconds
     private final int numSamples = duration * sampleRate;
 

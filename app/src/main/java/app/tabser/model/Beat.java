@@ -1,5 +1,7 @@
 package app.tabser.model;
 
+import java.util.Objects;
+
 public class Beat {
     public static final Beat INHERIT = new Beat(-1, -1);
     public static final Beat FOUR_FOURTH = new Beat(4, 4);
@@ -38,5 +40,18 @@ public class Beat {
 
     public void setTempo(int tempo) {
         this.tempo = tempo;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Beat beat = (Beat) o;
+        return bar == beat.bar && count == beat.count && tempo == beat.tempo;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(bar, count, tempo);
     }
 }

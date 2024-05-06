@@ -37,4 +37,10 @@ public class MainActivity extends AppCompatActivity {
         adapter = new FSAdapter( this);
         contentList.setAdapter(adapter);
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        adapter.refresh();
+    }
 }

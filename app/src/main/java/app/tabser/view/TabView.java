@@ -35,6 +35,7 @@ public class TabView extends View implements View.OnTouchListener, View.OnLongCl
         }
     };
     private final Design design;
+    private boolean dragging;
 
     public TabView(Context context, AttributeSet attr) {
         super(context, attr);
@@ -103,6 +104,7 @@ public class TabView extends View implements View.OnTouchListener, View.OnLongCl
         int right = width;
         int bottom = height;
         keyboardRect.set(left, top, right, bottom);
+        sheet.setViewPort(0,0,w,top);
         invalidate();
     }
 
@@ -115,6 +117,10 @@ public class TabView extends View implements View.OnTouchListener, View.OnLongCl
             handler.postDelayed(touchScheduler, ViewConfiguration.getLongPressTimeout());
             sheet.startMove();
         } else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+            if (dragging) {
+                dragging = false;
+                return false;
+            }
             if (sheet.settings.getMode() == TabSheet.Mode.EDIT
                     && keyboardRect.contains((int) motionEvent.getX(), (int) motionEvent.getY())) {
                 keyboard.touch(view, motionEvent, longClick);
@@ -125,6 +131,8 @@ public class TabView extends View implements View.OnTouchListener, View.OnLongCl
             if (longClick) {
                 longClick = false;
             }
+        } else if (motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
+            dragging = true;
         }
         if ((motionEvent.getAction() == MotionEvent.ACTION_MOVE)
                 || (motionEvent.getAction() == MotionEvent.ACTION_UP)) {

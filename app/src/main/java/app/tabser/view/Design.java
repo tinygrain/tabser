@@ -82,4 +82,8 @@ public class Design {
     public int getForegroundColorActiveSheet() {
         return foregroundColorActiveSheet;
     }
+
+    public long getAnimationDuration() {
+        return 333L;
+    }
 }

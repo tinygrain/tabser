@@ -6,17 +6,18 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.os.Handler;
+import android.util.Log;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import app.tabser.model.Bar;
 import app.tabser.model.Note;
 import app.tabser.model.Sequence;
-import app.tabser.model.TabModel;
+import app.tabser.model.Song;
 
 public class ToneGenerator {
-    private final int sampleRate = 44100;
+    private final int sampleRate = 44100/5;
     private final AudioAttributes audioAttributes;
     private final AudioFormat audioFormat;
     private final Handler handler = new Handler();
@@ -58,15 +59,19 @@ public class ToneGenerator {
         // fill out the array
         int numSamples = (int) (duration * sampleRate);
         double[] sample = new double[numSamples];
-        ;
-        for (int i = 0; i < numSamples; ++i) {
+        double effFreq = freqOfTone / sampleRate;
+        double lastPoint = effFreq * numSamples;
+        double lastDecimals = lastPoint - (int) lastPoint;
+        int overflow = (int) (lastDecimals / effFreq);
+        for (int i = 0; i < numSamples-overflow; ++i) {
             sample[i] = Math.sin(2 * Math.PI * i / (sampleRate / freqOfTone));
-            //sample[i] = Math.sin(2 * Math.PI * i);
         }
+        Log.d("TAG", "genTone: "+sample[sample.length-1]);
 
         // convert to 16 bit pcm sound array
         // assumes the sample buffer is normalised.
         int idx = 0;
+
         byte generatedSnd[] = new byte[2 * numSamples];
         for (final double dVal : sample) {
             // scale to maximum amplitude
@@ -89,10 +94,11 @@ public class ToneGenerator {
         //audioTrack.stop();
     }
 
-    public void play(TabModel model) {
+    public void play(Song model) {
         for (Bar bar : model.getBars(Sequence.DEFAULT_HIDDEN_SEQUENCE_NAME)) {
-            for (Note[] notes : bar.getNotes()) {
-                for (Note n : notes) {
+            for (Map<Integer, Note> notes : bar.getNotes()) {
+                for (Integer key: notes.keySet()) {
+                    Note n = notes.get(key);
                     if (Objects.nonNull(n)) {
                         play(n.getPitch().getFrequency(), 2);
                     }

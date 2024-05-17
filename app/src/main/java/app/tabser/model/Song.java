@@ -10,10 +10,14 @@ import java.util.Objects;
 
 import app.tabser.view.ToneGenerator;
 
-public class TabModel {
+public class Song {
 
-    public static enum Clef {
-        TREBLE, TAB, BASS
+    public enum Clef {
+        TAB,
+
+        BASS,
+
+        TREBLE
     }
 
     /*
@@ -35,9 +39,9 @@ public class TabModel {
      */
     private Map<String, Sequence> sequenceMap = new HashMap<>();
     private List<String> sequenceOrder = new ArrayList<>();
-    private List<String> songText = new ArrayList<>();
+    private List<Songtext> songText = new ArrayList<>();
 
-    public TabModel() {
+    public Song() {
     }
 
     public Clef getClef() {
@@ -120,11 +124,11 @@ public class TabModel {
         this.sequenceOrder = sequenceOrder;
     }
 
-    public List<String> getSongText() {
+    public List<Songtext> getSongText() {
         return songText;
     }
 
-    public void setSongText(List<String> songText) {
+    public void setSongText(List<Songtext> songText) {
         this.songText = songText;
     }
 
@@ -168,16 +172,11 @@ public class TabModel {
         Sequence sequence = checkGetSequence(sequenceKey);
         ArrayList<Bar> bars = sequence.getBars();
         if (bars.size() > barIndex && bars.get(barIndex).getNotes().size() > beatIndex) {
-            bars.get(barIndex).getNotes().get(beatIndex)[selectedString] = null;
-            boolean allNull = true;
-            for (int i = 0; i < bars.get(barIndex).getNotes().get(beatIndex).length; i++) {
-                if (Objects.nonNull(bars.get(barIndex).getNotes().get(beatIndex)[i])) {
-                    allNull = false;
-                    break;
-                }
-            }
-            if (allNull) {
-                bars.get(barIndex).getNotes().remove(beatIndex);
+            List<Map<Integer, Note>> notes = bars.get(barIndex).getNotes();
+            Map<Integer, Note> note = notes.get(beatIndex);
+            note.remove(selectedString);
+            if (note.isEmpty()) {
+                notes.remove(beatIndex);
             }
         }
     }
@@ -196,7 +195,7 @@ public class TabModel {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        TabModel tabModel = (TabModel) o;
+        Song tabModel = (Song) o;
         return released == tabModel.released && clef == tabModel.clef && Objects.equals(tuning, tabModel.tuning) && Objects.equals(beat, tabModel.beat) && Objects.equals(instrument, tabModel.instrument) && Objects.equals(artist, tabModel.artist) && Objects.equals(title, tabModel.title) && Objects.equals(album, tabModel.album) && Objects.equals(sequenceMap, tabModel.sequenceMap) && Objects.equals(sequenceOrder, tabModel.sequenceOrder) && Objects.equals(songText, tabModel.songText);
     }
 

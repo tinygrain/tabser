@@ -1,29 +1,26 @@
-package app.tabser.view;
+package app.tabser.view.model.definition;
 
 import android.graphics.Color;
 
-public class Design {
-    public static Design BRIGHT_MODE = new Design(
+import app.tabser.view.model.geometry.SheetMetrics;
+
+public final class Design {
+    public static final Design BRIGHT_MODE = new Design(
             Color.BLACK, Color.LTGRAY, Color.GREEN,
             Color.LTGRAY, Color.BLACK, Color.GREEN
     );
-    public static Design DARK_MODE = new Design(
+    public static final Design DARK_MODE = new Design(
             Color.BLACK, Color.LTGRAY, Color.GREEN,
             Color.DKGRAY, Color.LTGRAY, Color.GREEN
     );
-    public static Design PAPER_MODE = new Design(
+    public static  final Design PAPER_MODE = new Design(
             Color.BLACK, Color.LTGRAY, Color.GREEN,
             Color.WHITE, Color.BLACK, Color.GREEN
     );
-    public static Design MICKEY_MOUSE = new Design(
+    public static final Design MICKEY_MOUSE = new Design(
             Color.BLACK, Color.CYAN, Color.MAGENTA,
             Color.CYAN, Color.BLUE, Color.MAGENTA
     );
-
-    private final float strokeWidth = 5f;
-    private final float yIncrement = 50f;
-    private final float yStart = yIncrement * 2;
-    private final float xStart = 25f;
 
     private final int backgroundColorKeyboard;
     private final int foregroundColorInactiveKeyboard;
@@ -41,22 +38,6 @@ public class Design {
         this.backgroundColorSheet = backgroundColorSheet;
         this.foregroundColorInactiveSheet = foregroundColorInactiveSheet;
         this.foregroundColorActiveSheet = foregroundColorActiveSheet;
-    }
-
-    public float getStrokeWidth() {
-        return strokeWidth;
-    }
-
-    public float getYIncrement() {
-        return yIncrement;
-    }
-
-    public float getYStart() {
-        return yStart;
-    }
-
-    public float getxStart() {
-        return xStart;
     }
 
     public int getBackgroundColorKeyboard() {
@@ -83,7 +64,4 @@ public class Design {
         return foregroundColorActiveSheet;
     }
 
-    public long getAnimationDuration() {
-        return 333L;
-    }
 }

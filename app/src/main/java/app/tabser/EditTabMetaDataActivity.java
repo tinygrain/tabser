@@ -27,7 +27,7 @@ import java.nio.charset.StandardCharsets;
 import app.tabser.fs.FS;
 import app.tabser.model.Beat;
 import app.tabser.model.BeatAdapter;
-import app.tabser.model.TabModel;
+import app.tabser.model.Song;
 import app.tabser.model.Tuning;
 import app.tabser.model.TuningAdapter;
 
@@ -84,7 +84,7 @@ public class EditTabMetaDataActivity extends AppCompatActivity
         EditText etInstrument = findViewById(R.id.etTabInstrumentName);
         String title = etTitle.getText().toString();
 
-        TabModel model = new TabModel();
+        Song model = new Song();
         if ("".equals(title)) {
             error(R.string.error_title_is_empty);
             etTitle.requestFocus();
@@ -121,9 +121,9 @@ public class EditTabMetaDataActivity extends AppCompatActivity
             beat.setTempo(Integer.parseInt(etTempo.getText().toString()));
         }
         if (rbBassClef.isChecked()) {
-            model.setClef(TabModel.Clef.BASS);
+            model.setClef(Song.Clef.BASS);
         } else {
-            model.setClef(TabModel.Clef.TREBLE);
+            model.setClef(Song.Clef.TREBLE);
         }
         Tuning tuning = (Tuning) tuningAdapter.getItem(spTuning.getSelectedItemPosition());
         model.setTuning(tuning);

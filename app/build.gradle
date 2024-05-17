@@ -11,7 +11,6 @@ android {
         targetSdk 33
         versionCode 1
         versionName "1.0"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -32,6 +31,10 @@ dependencies {
     //implementation files('libs/jsyn-20170815.jar')
     //implementation group: 'com.jsyn', name: 'jsyn', version: '20170815'
     //implementation 'com.github.billthefarmer:mididriver:v1.24'
+    // https://mvnrepository.com/artifact/org.apache.pdfbox/pdfbox
+    //implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: '3.0.2'
+    // https://mvnrepository.com/artifact/com.tom-roush/pdfbox-android
+    implementation group: 'com.tom-roush', name: 'pdfbox-android', version: '2.0.27.0'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.17.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     //implementation 'com.google.android.material:material:1.11.0'

@@ -7,25 +7,32 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.view.MotionEvent;
 
+import java.io.IOException;
+
 import app.tabser.R;
-import app.tabser.model.TabModel;
+import app.tabser.model.Song;
+import app.tabser.view.model.definition.Design;
+import app.tabser.view.model.geometry.SheetMetrics;
+import app.tabser.view.model.pdf.PDFSheet;
+import app.tabser.view.model.pdf.PDFSongRenderer;
+import app.tabser.view.render.SongRendererFactory;
 
 public class TabViewControls {
-    private final TabSheet sheet;
+    private final SheetView sheet;
     private final Context context;
     private final Design design;
     private final TabView tabView;
     private final Rect[] buttonRects = new Rect[5];
-    private TabModel model;
+    private Song model;
 
-    public TabViewControls(TabSheet sheet, Context context, Design design, TabView tabView) {
+    public TabViewControls(SheetView sheet, Context context, Design design, TabView tabView) {
         this.tabView = tabView;
         this.sheet = sheet;
         this.context = context;
         this.design = design;
     }
 
-    public void loadModel(TabModel model) {
+    public void loadModel(Song model) {
         this.model = model;
     }
 
@@ -81,7 +88,7 @@ public class TabViewControls {
                         break;
                     case 4: // Edit
                         message = "Edit";
-                        sheet.settings.setMode(TabSheet.Mode.EDIT);
+                        sheet.settings.setMode(SheetView.Mode.EDIT);
                         tabView.invalidate();
                         break;
                 }

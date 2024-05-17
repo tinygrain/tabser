@@ -1,8 +1,11 @@
 package app.tabser.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.Objects;
 
-public class Note  {
+public class Note {
+
     public static final String C = "C";
     public static final String C_SHARP = "C#";
     public static final String D = "D";
@@ -20,7 +23,7 @@ public class Note  {
     public static final String[] SCALE =
             {C, C_SHARP, D, D_SHARP, E, F, F_SHARP, G, G_SHARP, A, A_SHARP, B};
 
-    private  boolean isBreak;
+    private boolean isBreak;
     private Length length;
     private Pitch pitch;
     private int string;
@@ -85,6 +88,18 @@ public class Note  {
 
     public void setExpression(Expression expression) {
         this.expression = expression;
+    }
+
+    @JsonIgnore
+    public int position(Song.Clef clef) {
+        if (clef == Song.Clef.TREBLE) {
+
+        } else if (clef == Song.Clef.BASS) {
+
+        } else if (clef == Song.Clef.TAB) {
+
+        }
+        return 4;
     }
 
     @Override

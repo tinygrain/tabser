@@ -1,6 +1,6 @@
 package app.tabser.fs;
 
-import app.tabser.model.TabModel;
+import app.tabser.model.Song;
 
 public class FS {
     private static final String formatName = "%s - %s - %d - %s.json";
@@ -11,7 +11,7 @@ public class FS {
         return false;
     }
 
-    void store(TabModel model){
+    void store(Song model){
 
     }
 }

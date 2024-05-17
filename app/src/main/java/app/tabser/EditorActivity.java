@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-import app.tabser.model.TabModel;
+import app.tabser.model.Song;
 import app.tabser.view.TabView;
 
 public class EditorActivity extends AppCompatActivity {
@@ -32,7 +32,7 @@ public class EditorActivity extends AppCompatActivity {
         String mode = getIntent().getStringExtra("mode");
         tabView = findViewById(R.id.tabView);
         try(InputStream in = openFileInput(fileName)){
-            tabView.loadModel(mode, new ObjectMapper().readValue(in, TabModel.class));
+            tabView.loadModel(mode, new ObjectMapper().readValue(in, Song.class));
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {

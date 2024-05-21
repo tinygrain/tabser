@@ -1,23 +1,25 @@
-package app.tabser.view.model.blocks;
+package app.tabser.view.model.definition;
 
 import android.graphics.Rect;
 
-import app.tabser.model.Song;
-import app.tabser.view.model.definition.Design;
-import app.tabser.view.model.definition.Sheet;
 import app.tabser.view.render.RenderIterator;
-import app.tabser.view.render.RenderModel;
 
 public interface RenderBlock {
 
-    void calculate(RenderIterator renderIterator);
+    Rect getRelativeBounds();
+
+    //    void calculate(RenderIterator renderIterator);
     Rect getBounds();
 
     default boolean contains(float x, float y) {
         return getBounds().contains((int) x, (int) y);
     }
 
-    <T> T touch(float x, float y, boolean longClick, Class<T> resultClass);
+    default boolean containsRelative(float x, float y) {
+        return getRelativeBounds().contains((int) x, (int) y);
+    }
+
+    void touch(float x, float y, boolean longClick);
 
     void render(RenderIterator iterator);
 

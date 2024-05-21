@@ -1,4 +1,4 @@
-package app.tabser.view.model.display;
+package app.tabser.view.render.display;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -23,8 +23,8 @@ public class DisplaySheet extends AbstractSheet implements Sheet {
     private Paint.Style defaultStyle;
 
 
-    public DisplaySheet(Context context, Rect viewPort, SheetMetrics sheetMetrics) {
-        super(context, viewPort, sheetMetrics);
+    public DisplaySheet(Context context, SheetMetrics sheetMetrics) {
+        super(context, sheetMetrics);
     }
 
     public void setUp(Canvas canvas, Paint paint) {

@@ -1,4 +1,4 @@
-package app.tabser.view;
+package app.tabser.view.input;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -7,27 +7,25 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.view.MotionEvent;
 
-import java.io.IOException;
-
 import app.tabser.R;
 import app.tabser.model.Song;
+import app.tabser.view.SongView;
+import app.tabser.view.TabView;
+import app.tabser.system.ToneGenerator;
+import app.tabser.view.ViewUtils;
 import app.tabser.view.model.definition.Design;
-import app.tabser.view.model.geometry.SheetMetrics;
-import app.tabser.view.model.pdf.PDFSheet;
-import app.tabser.view.model.pdf.PDFSongRenderer;
-import app.tabser.view.render.SongRendererFactory;
 
 public class TabViewControls {
-    private final SheetView sheet;
+    private final SongView view;
     private final Context context;
     private final Design design;
     private final TabView tabView;
     private final Rect[] buttonRects = new Rect[5];
     private Song model;
 
-    public TabViewControls(SheetView sheet, Context context, Design design, TabView tabView) {
+    public TabViewControls(SongView view, Context context, Design design, TabView tabView) {
         this.tabView = tabView;
-        this.sheet = sheet;
+        this.view = view;
         this.context = context;
         this.design = design;
     }
@@ -67,7 +65,7 @@ public class TabViewControls {
         return yStart + height;
     }
 
-    String touch(MotionEvent motionEvent, boolean longClick) {
+    public String touch(MotionEvent motionEvent, boolean longClick) {
         String message = "No Action";
         for (int i = 0; i < buttonRects.length; i++) {
             if (buttonRects[i].contains((int) motionEvent.getX(), (int) motionEvent.getY())) {
@@ -88,7 +86,7 @@ public class TabViewControls {
                         break;
                     case 4: // Edit
                         message = "Edit";
-                        sheet.settings.setMode(SheetView.Mode.EDIT);
+                        view.settings.setMode(SongView.Mode.EDIT);
                         tabView.invalidate();
                         break;
                 }

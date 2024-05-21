@@ -2,32 +2,31 @@ package app.tabser.view.model.blocks;
 
 import android.graphics.Rect;
 
-import app.tabser.model.Song;
-import app.tabser.view.model.definition.Design;
-import app.tabser.view.model.definition.Sheet;
+import app.tabser.view.model.definition.RenderBlock;
+import app.tabser.view.model.geometry.ViewPort;
 import app.tabser.view.model.geometry.SheetMetrics;
 import app.tabser.view.render.RenderIterator;
 
 public class AdvertisementBlock extends AbstractBlock implements RenderBlock {
+    public AdvertisementBlock(ViewPort viewPort) {
+        super(viewPort);
+    }
 
     @Override
-    public void calculate(RenderIterator renderIterator) {
+    protected void cache(RenderIterator iterator) {
+
+    }
+
+    @Override
+    protected Rect calculate(RenderIterator renderIterator) {
         SheetMetrics metrics = renderIterator.getModel().getSheetMetrics();
         float height = metrics.yIncrement * 3;
-        float fullWidth = renderIterator.getModel().getFullWidth();
-        setBounds((int) metrics.xMargin, (int) renderIterator.yPosition, (int) fullWidth, (int) height);
-        renderIterator.incrementYPosition(getBounds());
-
+        float fullWidth = renderIterator.getModel().getBlockWidth();
+        //setBounds((int) metrics.xMargin, (int) renderIterator.yPosition, (int) fullWidth, (int) height);
+        return boundsOnPage(renderIterator, (int) height);
     }
 
     @Override
-    public <T> T touch(float x, float y, boolean longClick, Class<T> resultClass) {
-        return null;
-    }
-
-    @Override
-    public void render(RenderIterator iterator) {
-
-        iterator.incrementYPosition(getBounds());
+    protected void draw(RenderIterator iterator) {
     }
 }

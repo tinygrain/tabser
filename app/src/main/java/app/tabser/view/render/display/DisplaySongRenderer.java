@@ -1,14 +1,12 @@
-package app.tabser.view.model.display;
+package app.tabser.view.render.display;
 
-import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Rect;
 
 import app.tabser.view.render.AbstractSongRenderer;
 import app.tabser.view.model.definition.Sheet;
 import app.tabser.view.model.definition.SongRenderer;
-import app.tabser.view.render.RenderModel;
+import app.tabser.view.model.RenderModel;
 
 public class DisplaySongRenderer extends AbstractSongRenderer implements SongRenderer {
 

@@ -1,4 +1,4 @@
-package app.tabser.view.model.pdf;
+package app.tabser.view.render.pdf;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -32,7 +32,7 @@ public class PDFSheet extends AbstractSheet implements Sheet {
     private PDPageContentStream currentPageContentStream;
 
     public PDFSheet(Context context, Rect viewPort, SheetMetrics sheetMetrics) throws IOException {
-        super(context, viewPort, sheetMetrics);
+        super(context, sheetMetrics);
         PDFBoxResourceLoader.init(context);
         document = new PDDocument();
         newPage(null);

@@ -1,4 +1,4 @@
-package app.tabser.view;
+package app.tabser.view.input;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -12,11 +12,12 @@ import android.view.View;
 import app.tabser.model.Pitch;
 import app.tabser.model.Length;
 import app.tabser.model.Song;
+import app.tabser.view.SongCursor;
+import app.tabser.view.SongView;
 import app.tabser.view.model.definition.Design;
-import app.tabser.view.model.geometry.SheetMetrics;
 
-class TabKeyboard {
-    private final SheetView sheet;
+public final class TabKeyboard {
+    private final SongView sheet;
     private final Design design;
 
     private enum Menu {
@@ -68,7 +69,7 @@ class TabKeyboard {
     private final SharedPreferences preferences;
     private final Context context;
 
-    TabKeyboard(Rect menuRect, SheetView sheet, Context c, Design design) {
+    public TabKeyboard(Rect menuRect, SongView sheet, Context c, Design design) {
         this.design = design;
         this.context = c;
         this.menuRect = menuRect;
@@ -80,12 +81,12 @@ class TabKeyboard {
         selectedLength = preferences.getInt("speed", 2);
     }
 
-    void loadModel(Song model) {
+    public void loadModel(Song model) {
         this.model = model;
         this.stringRects = new Rect[model.getTuning().getStringCount()];
     }
 
-    void drawControls(Canvas canvas, Paint paint) {
+    public void drawControls(Canvas canvas, Paint paint) {
         paint.setColor(design.getBackgroundColorKeyboard());
         canvas.drawRect(menuRect, paint);
         int menuHeight = (menuRect.bottom - menuRect.top);
@@ -301,7 +302,7 @@ class TabKeyboard {
         view.invalidate();
     }
 
-    String touch(View view, MotionEvent motionEvent, boolean longClick) {
+    public String touch(View view, MotionEvent motionEvent, boolean longClick) {
         String message = "No Action";
         search:
         {
@@ -406,7 +407,7 @@ class TabKeyboard {
                                 break;
                             case 5:
                                 // VIEW
-                                sheet.settings.setMode(SheetView.Mode.VIEW);
+                                sheet.settings.setMode(SongView.Mode.VIEW);
                                 view.invalidate();
                                 break;
                         }
@@ -419,7 +420,7 @@ class TabKeyboard {
                         if (fretRects[yIndex][xIndex].contains((int) motionEvent.getX(), (int) motionEvent.getY())) {
                             message = fretStrings[yIndex][xIndex];
                             if ("-".equals(message)) {
-                                SheetView.ModelCursor mc = sheet.getModelCursor();
+                                SongCursor mc = sheet.getSongCursor();
                                 model.clearNote(selectedString, mc.barIndex, mc.beatIndex, mc.sequenceKey);
                             } else {
                                 int fret = -1;
@@ -427,7 +428,7 @@ class TabKeyboard {
                                     fret = Integer.parseInt(message);
                                 } catch (NumberFormatException e) {
                                 }
-                                SheetView.ModelCursor mc = sheet.getModelCursor();
+                                SongCursor mc = sheet.getSongCursor();
                                 boolean newBar = model.addNote(selectedString, fret,
                                         lengths[selectedLength], mc.barIndex, mc.beatIndex,
                                         sheet.settings.isAutoBar(), sheet.settings.isInsert(), mc.sequenceKey, context);

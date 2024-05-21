@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import app.tabser.view.ToneGenerator;
+import app.tabser.system.ToneGenerator;
 
 public class Song {
 

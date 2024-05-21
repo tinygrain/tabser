@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
-import android.graphics.Rect;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -14,20 +13,19 @@ import android.view.View;
 import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 import app.tabser.model.Bar;
-import app.tabser.model.Sequence;
 import app.tabser.model.Song;
 import app.tabser.view.model.definition.Design;
 import app.tabser.view.model.definition.Sheet;
-import app.tabser.view.model.display.DisplaySheet;
-import app.tabser.view.model.display.DisplaySongRenderer;
+import app.tabser.view.render.display.DisplaySheet;
+import app.tabser.view.render.display.DisplaySongRenderer;
 import app.tabser.view.model.geometry.SheetMetrics;
-import app.tabser.view.render.RenderIterator;
+import app.tabser.view.model.geometry.ViewPort;
+import app.tabser.view.render.RenderOptions;
 import app.tabser.view.render.SongRendererFactory;
 
-public class SheetView  implements View.OnScrollChangeListener, View.OnGenericMotionListener {
+public class SongView implements View.OnScrollChangeListener, View.OnGenericMotionListener {
     public final Navigation nav = new Navigation();
     public final Settings settings = new Settings();
     private final Design design;
@@ -35,9 +33,10 @@ public class SheetView  implements View.OnScrollChangeListener, View.OnGenericMo
     private Song model;
     private Context context;
     //private ModelCursor[] displayedCursorPositions;
-    private ModelCursor modelCursor;
+    private SongCursor modelCursor;
 
-    private float deltaY;
+//    private float deltaY;
+    private final ViewPort viewPort;
     private float downY;
     private float initialY;
 
@@ -47,48 +46,57 @@ public class SheetView  implements View.OnScrollChangeListener, View.OnGenericMo
 
     private boolean searchCursor;
 
-    private Rect viewPort = new Rect();
+   // private Rect viewPortArea = new Rect();
 
     private DisplaySongRenderer renderer;
+
+    private final RenderOptions options;
 
 //    private final DisplaySheet sheet;
 
     //private List<RenderedLine> renderedLines = new ArrayList<>();
 
-    SheetView(TabView tabView, Design design) {
+    SongView(TabView tabView, Design design) {
         this.design = design;
         this.context = tabView.getContext();
         this.tabView = tabView;
-        modelCursor = new ModelCursor();
-        deltaY = 0;
+        modelCursor = new SongCursor();
+        viewPort = new ViewPort();
+//        viewPort.area = viewPort;
+        this.options = RenderOptions.builder()
+                .setViewPort(viewPort)
+                .setForm(RenderOptions.Form.FULL)
+                .setFormat(RenderOptions.SheetFormat.Element.NOTES,
+                        RenderOptions.SheetFormat.Element.SONG_TEXT,
+                        RenderOptions.SheetFormat.Element.TAB)
+                .setSheetMetrics(SheetMetrics.getDefaultMetrics(viewPort))
+                .setCursor(modelCursor)
+                .build();
     }
 
     void loadModel(Song model) {
         this.model = model;
-        Sheet displaySheet = new DisplaySheet(context, viewPort, SheetMetrics.DEFAULT_METRICS);
+        Sheet displaySheet = new DisplaySheet(context, options.sheetMetrics);
         this.renderer = (DisplaySongRenderer) SongRendererFactory.create(model, displaySheet, design);
     }
 
     void drawSheet(Canvas canvas, Paint paint, boolean dragging) {
         renderer.setUp(canvas, paint);
-        RenderIterator iterator = renderer.iterator();
-        iterator.yPosition = deltaY;
-        //iterator.cursorPositions = new ArrayList<>();
-        renderer.renderDocument(iterator);
+        renderer.renderDocument(options);
     }
 
-    public ModelCursor getModelCursor() {
+    public SongCursor getSongCursor() {
         return modelCursor;
     }
 
     void setViewPort(int left, int top, int right, int bottom) {
-        viewPort.set(left, top, right, bottom);
+        viewPort.area.set(left, top, right, bottom);
     }
 
     String touch(MotionEvent event, boolean longClick) {
         int x = (int) event.getX();
         int y = (int) event.getY();
-        ModelCursor tmpModelCursor = null;
+        SongCursor tmpModelCursor = null;
         String message = "No Action";
 
 //        if (Objects.nonNull(displayedCursorPositions)) {
@@ -114,18 +122,18 @@ public class SheetView  implements View.OnScrollChangeListener, View.OnGenericMo
     }
 
     public void startMove() {
-        this.initialY = deltaY;
+        this.initialY = viewPort.deltaY;
     }
 
-    public void move(Point pointDown, Point pointTo) {
+    public void moveVertical(Point pointDown, Point pointTo) {
         downY = pointDown.y;
-        deltaY = initialY + (pointTo.y - downY);
+        viewPort.deltaY = initialY + (pointTo.y - downY);
         float yMax = 0f;
-        deltaY = Math.min((int) yMax, deltaY);
-//        RenderedLine l = renderedLines.get(renderedLines.size() - 1);
+        viewPort.deltaY = Math.min((int) yMax, viewPort.deltaY);
+////        RenderedLine l = renderedLines.get(renderedLines.size() - 1);
         int lineOffset = renderer.getYMin();
-        //float yMin = ((lineCount - 1) * l..height) * -1;
-        deltaY = Math.max(lineOffset, deltaY);
+//        //float yMin = ((lineCount - 1) * l..height) * -1;
+        viewPort.deltaY = Math.max(lineOffset, viewPort.deltaY);
         tabView.invalidate();
     }
 
@@ -148,42 +156,78 @@ public class SheetView  implements View.OnScrollChangeListener, View.OnGenericMo
         EDIT, VIEW;
     }
 
-    public final class ModelCursor {
-        public String sequenceKey = Sequence.DEFAULT_HIDDEN_SEQUENCE_NAME;
-        public int barIndex;
-        public int beatIndex;
-        public Rect selectionArea;
-        //private Rect responseArea;
-        public int lineIndex;
+    public final class Settings {
+        private boolean insert;
+        private boolean compact;
+        private boolean autoNext;
+        private boolean autoBar;
+        private Mode mode;
 
-        private void setRect(float left, float top, float right, float bottom) {
-            setRect((int) left, (int) top, (int) right, (int) bottom);
+        public void setUp(SharedPreferences preferences) {
+            insert = preferences.getBoolean("insert", false);
+            compact = preferences.getBoolean("compact", false);
+            autoBar = preferences.getBoolean("auto-bar", false);
+            autoNext = preferences.getBoolean("auto-next", false);
         }
 
-        private void setRect(int left, int top, int right, int bottom) {
-            selectionArea = new Rect(left, top, right, bottom);
+        public boolean isInsert() {
+            return insert;
         }
 
-        public boolean isTrailing() {
-            ArrayList<Bar> bars = model.getBars(sequenceKey);
-            int lastBarSize = bars.size() > 0 ? bars.get(bars.size() - 1).size() : 0;
-            return barIndex >= bars.size() - 1 && beatIndex == lastBarSize;
+        public void setInsert(boolean insert) {
+            this.insert = insert;
+        }
+
+        public boolean toggleInsert() {
+            return (this.insert = !this.insert);
+        }
+
+        public boolean isCompact() {
+            return compact;
+        }
+
+        public boolean isAutoBar() {
+            return autoBar;
+        }
+
+        public boolean isAutoNext() {
+            return autoNext;
+        }
+
+        public boolean toggleCompact() {
+            return (this.compact = !this.compact);
+        }
+
+        public boolean toggleAutoNext() {
+            return (this.autoNext = !this.autoNext);
+        }
+
+        public boolean toggleAutoBar() {
+            return (this.autoBar = !this.autoBar);
+        }
+
+        public Mode getMode() {
+            return mode;
+        }
+
+        public void setMode(Mode mode) {
+            this.mode = mode;
         }
     }
 
-    final class Navigation implements ValueAnimator.AnimatorUpdateListener {
+   public final class Navigation implements ValueAnimator.AnimatorUpdateListener {
         float animationStart;
         ValueAnimator animator;
 
         @Override
         public void onAnimationUpdate(@NonNull ValueAnimator valueAnimator) {
             int value = (int) valueAnimator.getAnimatedValue();
-            deltaY = animationStart + value;
+            viewPort.deltaY = animationStart + value;
             tabView.invalidate();
         }
 
         void startAnimation(int yDelta1, int yDelta2, long animationTime) {
-            animationStart = deltaY;
+            animationStart = viewPort.deltaY;
             int animationGoal = yDelta2 - yDelta1;
             animator = ValueAnimator.ofInt(0, animationGoal);
             //animator.setDuration(design.getAnimationDuration() * Math.abs((long) (animationGoal / lineHeight)));
@@ -194,8 +238,8 @@ public class SheetView  implements View.OnScrollChangeListener, View.OnGenericMo
         }
 
         void scrollToLine(int lineIndex, long animationTime) {
-            float deltaY1 = deltaY;
-            float deltaY2 = -(renderer.getHeaderHeight() + renderer.getLine(lineIndex).metrics.yOffset);
+            float deltaY1 = viewPort.deltaY;
+            float deltaY2 = -(renderer.getBlockOffsetY(lineIndex));
             startAnimation((int) deltaY1, (int) deltaY2, animationTime);
         }
 
@@ -273,65 +317,6 @@ public class SheetView  implements View.OnScrollChangeListener, View.OnGenericMo
                 modelCursor.beatIndex = 0;
                 searchCursor = true;
             }
-        }
-    }
-
-    final class Settings {
-        private boolean insert;
-        private boolean compact;
-        private boolean autoNext;
-        private boolean autoBar;
-        private Mode mode;
-
-        public void setUp(SharedPreferences preferences) {
-            insert = preferences.getBoolean("insert", false);
-            compact = preferences.getBoolean("compact", false);
-            autoBar = preferences.getBoolean("auto-bar", false);
-            autoNext = preferences.getBoolean("auto-next", false);
-        }
-
-        public boolean isInsert() {
-            return insert;
-        }
-
-        public void setInsert(boolean insert) {
-            this.insert = insert;
-        }
-
-        public boolean toggleInsert() {
-            return (this.insert = !this.insert);
-        }
-
-        public boolean isCompact() {
-            return compact;
-        }
-
-        public boolean isAutoBar() {
-            return autoBar;
-        }
-
-        public boolean isAutoNext() {
-            return autoNext;
-        }
-
-        public boolean toggleCompact() {
-            return (this.compact = !this.compact);
-        }
-
-        public boolean toggleAutoNext() {
-            return (this.autoNext = !this.autoNext);
-        }
-
-        public boolean toggleAutoBar() {
-            return (this.autoBar = !this.autoBar);
-        }
-
-        public Mode getMode() {
-            return mode;
-        }
-
-        public void setMode(Mode mode) {
-            this.mode = mode;
         }
     }
 }

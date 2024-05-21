@@ -1,36 +1,35 @@
 package app.tabser.view.model.blocks;
 
 import android.graphics.Color;
+import android.graphics.Rect;
 
+import app.tabser.view.model.definition.RenderBlock;
 import app.tabser.view.model.definition.Sheet;
+import app.tabser.view.model.geometry.ViewPort;
 import app.tabser.view.model.geometry.SheetMetrics;
 import app.tabser.view.render.RenderIterator;
 
 public class SongHeaderBlock extends AbstractBlock implements RenderBlock {
-    public SongHeaderBlock() {
+
+    public SongHeaderBlock(ViewPort viewPort) {
+        super(viewPort);
     }
 
     @Override
-    public void calculate(RenderIterator renderIterator) {
-        float fullWidth = renderIterator.getModel().getFullWidth();
+    protected void cache(RenderIterator iterator) {
+
+    }
+
+    protected Rect calculate(RenderIterator renderIterator) {
         SheetMetrics metrics = renderIterator.getModel().getSheetMetrics();
         int height = (int) (metrics.yIncrement * 3);
-        setBounds((int) metrics.xMargin, (int) metrics.yMargin, (int) fullWidth, height);
-        renderIterator.incrementYPosition(getBounds());
+        return boundsOnPage(renderIterator, height);
     }
 
-    @Override
-    public <T> T touch(float x, float y, boolean longClick, Class<T> resultClass) {
-        return null;
-    }
-
-    @Override
-    public void render(RenderIterator iterator) {
+    protected void draw(RenderIterator iterator) {
         Sheet sheet = iterator.getModel().sheet;
         sheet.setForegroundColor(Color.CYAN);
-        sheet.drawRect(getBounds());
+        sheet.drawRect(getRelativeBounds());
         sheet.resetParameters();
-//        sheet.drawText();
-        iterator.incrementYPosition(getBounds());
     }
 }

@@ -1,9 +1,8 @@
 package app.tabser.view.render;
 
-import app.tabser.view.model.blocks.LineBlock;
+import app.tabser.view.model.RenderModel;
+import app.tabser.view.model.definition.RenderBlock;
 import app.tabser.view.model.definition.SongRenderer;
-import app.tabser.view.render.RenderIterator;
-import app.tabser.view.render.RenderModel;
 
 public abstract class AbstractSongRenderer implements SongRenderer {
 
@@ -18,39 +17,32 @@ public abstract class AbstractSongRenderer implements SongRenderer {
     }
 
     @Override
-    public LineBlock getLine(int i) {
-        return renderModel.getLine(i);
-    }
-
-    @Override
-    public void calculateModel() {
-        renderModel.calculate(iterator());
-    }
-
-    @Override
-    public void renderDocument(RenderIterator iterator) {
-        calculateModel();
-        //RenderIterator iterator = new RenderIterator();
-        preparePage(iterator);
-        iterator.getModel().songHeaderBlock.render(iterator);
+    public void renderDocument(RenderOptions options) {
+       RenderIterator iterator = iterator(options);
+       preProcess(iterator);
         while (iterator.hasNext()) {
-            renderLine(iterator);
+            renderBlock(iterator);
             if (iterator.pageEndReached && !iterator.endReached) {
                 newPage(iterator);
+                iterator.pageOffset++;
+                iterator.yPosition = 0;
             } else {
-                iterator.lineOffset++;
             }
         }
+        postProcess(iterator);
+    }
+
+    private void renderBlock(RenderIterator iterator) {
+        RenderBlock block = iterator.next();
+        block.render(iterator);
     }
 
     @Override
-    public void renderLine(RenderIterator it) {
-        if (it.lineOffset < renderModel.getLineCount()) {
-            LineBlock line = renderModel.getLine(it.lineOffset);
-            line.render(it);
-        } else {
-            it.endReached = true;
+    public float getBlockOffsetY(int lineIndex) {
+        if (renderModel.sheetModel.documentBlocks.size() > lineIndex) {
+            return renderModel.sheetModel.documentBlocks.get(lineIndex).getBounds().top;
         }
+        return 0;
     }
 
     @Override
@@ -58,17 +50,11 @@ public abstract class AbstractSongRenderer implements SongRenderer {
         return renderModel.getYMin();
     }
 
-    @Override
-    public RenderIterator iterator() {
-        return new RenderIterator(renderModel);
-    }
-
-    @Override
-    public float getHeaderHeight() {
-        return renderModel.songHeaderBlock.getBounds().height();
+    protected RenderIterator iterator(RenderOptions options) {
+        return new RenderIterator(renderModel, options);
     }
 
     public RenderModel getModel() {
-        return  renderModel;
+        return renderModel;
     }
 }

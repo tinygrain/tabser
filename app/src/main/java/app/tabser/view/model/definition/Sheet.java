@@ -9,7 +9,7 @@ public interface Sheet {
     enum Stroke {
         FILL, OUTLINE, DASHED_OUTLINE
     }
-    Rect getViewPort();
+//    Rect getViewPort();
     boolean isMultiPage();
     void drawVector(int resId, float x, float y, float width, float height);
 
@@ -18,9 +18,7 @@ public interface Sheet {
 
     void drawText(float xStart, float yStart, String text);
 
-    default SheetMetrics getMetrics() {
-        return SheetMetrics.DEFAULT_METRICS;
-    }
+    SheetMetrics getMetrics();
 
     void setForegroundColor(int color);
 

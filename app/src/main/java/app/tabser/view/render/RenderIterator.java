@@ -1,12 +1,9 @@
 package app.tabser.view.render;
 
-import android.graphics.Rect;
-
-import java.util.ArrayList;
-
 import app.tabser.model.Sequence;
-import app.tabser.view.SheetView;
+import app.tabser.view.model.RenderModel;
 import app.tabser.view.model.blocks.LineBlock;
+import app.tabser.view.model.definition.RenderBlock;
 
 public final class RenderIterator {
     //    @Deprecated
@@ -15,6 +12,7 @@ public final class RenderIterator {
     public int beatOffset;
     public int lineOffset;
     public int pageOffset;
+    public float xPosition;
     public float yPosition;
     public boolean pageEndReached;
     public boolean endReached;
@@ -24,8 +22,14 @@ public final class RenderIterator {
 
     private final RenderModel renderModel;
 
-    RenderIterator(RenderModel renderModel) {
+    public final RenderOptions options;
+    public int blockOffset;
+
+    RenderIterator(RenderModel renderModel, RenderOptions options) {
         this.renderModel = renderModel;
+        this.options = options;
+        this.xPosition = options.sheetMetrics.pageSideMargin;
+        this.yPosition = options.sheetMetrics.pageTopMargin;
     }
 
     public RenderModel getModel() {
@@ -36,16 +40,29 @@ public final class RenderIterator {
         return !endReached;
     }
 
-    public void incrementYPosition(Rect bounds) {
-        yPosition = bounds.bottom;
+    public RenderBlock next() {
+        return renderModel.next(this);
     }
 
-    public void incrementModel(LineBlock lineBlock) {
-        if (lineBlock.beatCount > 0) {
-            beatOffset+= lineBlock.beatCount;
-        } else if (lineBlock.barCount > 0) {
-            barOffset+=lineBlock.barCount;
+    public void increment(RenderBlock block) {
+        RenderOptions.Build build = options.build;
+        if (build == RenderOptions.Build.VERTICAL) {
+            yPosition = block.getBounds().bottom;
+        } else {
+            xPosition = block.getBounds().right;
         }
-        incrementYPosition(lineBlock.getBounds());
+        blockOffset++;
+        if (block instanceof LineBlock) {
+            LineBlock lineBlock = (LineBlock) block;
+            if (lineBlock.beatCount > 0) {
+                beatOffset += lineBlock.beatCount;
+            } else if (lineBlock.barCount > 0) {
+                barOffset += lineBlock.barCount;
+            }
+            if (barOffset == getModel().song.getBars(sequenceKey).size()) {
+                endReached = true;
+            }
+        }
+
     }
 }

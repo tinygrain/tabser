@@ -51,6 +51,7 @@ public abstract class AbstractSongRenderer implements SongRenderer {
     }
 
     protected RenderIterator iterator(RenderOptions options) {
+        // TODO return Iterable
         return new RenderIterator(renderModel, options);
     }
 

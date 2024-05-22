@@ -13,6 +13,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import app.tabser.model.Bar;
 import app.tabser.model.Song;
@@ -269,7 +270,7 @@ public class SongView implements View.OnScrollChangeListener, View.OnGenericMoti
         }
 
         public void nextBeat() {
-            ArrayList<Bar> bars = model.getBars(modelCursor.sequenceKey);
+            List<Bar> bars = model.getBars(modelCursor.sequenceKey);
             if (bars.size() > 0) {
                 if (modelCursor.beatIndex == bars.get(modelCursor.barIndex).size() - 1
                         && modelCursor.barIndex == bars.size() - 1) {
@@ -308,7 +309,7 @@ public class SongView implements View.OnScrollChangeListener, View.OnGenericMoti
             /*
              * TODO dont add too many bars
              */
-            ArrayList<Bar> bars = model.getBars(modelCursor.sequenceKey);
+            List<Bar> bars = model.getBars(modelCursor.sequenceKey);
             if (modelCursor.barIndex == bars.size() - 1
                     && modelCursor.beatIndex == bars.get(modelCursor.barIndex).size() && modelCursor.beatIndex > 0) {
                 bars.get(bars.size() - 1).setSeparator(Bar.SeparatorBar.NORMAL);

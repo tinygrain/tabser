@@ -10,7 +10,7 @@ import app.tabser.model.Song;
 import app.tabser.view.render.RenderOptions;
 
 public final class SongCursor {
-    public String sequenceKey = Sequence.DEFAULT_HIDDEN_SEQUENCE_NAME;
+    public String sequenceKey = Sequence.DEFAULT_SEQUENCE_NAME;
     public int barIndex;
     public int beatIndex;
     public Rect selectionArea;

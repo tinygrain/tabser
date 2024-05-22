@@ -95,7 +95,7 @@ public class ToneGenerator {
     }
 
     public void play(Song model) {
-        for (Bar bar : model.getBars(Sequence.DEFAULT_HIDDEN_SEQUENCE_NAME)) {
+        for (Bar bar : model.getBars(Sequence.DEFAULT_SEQUENCE_NAME)) {
             for (Map<Integer, Note> notes : bar.getNotes()) {
                 for (Integer key: notes.keySet()) {
                     Note n = notes.get(key);

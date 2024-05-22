@@ -3,7 +3,9 @@ package app.tabser.model;
 import java.util.Objects;
 
 public class Beat {
-    public static final Beat INHERIT = new Beat(-1, -1);
+    public static final int INHERIT_BAR = -1;
+    public static final int INHERIT_COUNT = -1;
+    public static final Beat INHERIT = new Beat(INHERIT_BAR, INHERIT_COUNT);
     public static final Beat FOUR_FOURTH = new Beat(4, 4);
     public static final Beat THREE_FOURTH = new Beat(3, 4);
     private  int bar;

@@ -11,12 +11,19 @@ import java.util.Objects;
 public class Bar {
 
     public enum SeparatorBar {
-        NORMAL, BOLD, REPEAT_START, REPEAT_END,
+        NORMAL, BOLD, REPEAT_START, REPEAT_END, CONCLUSION
     }
 
     private Beat beat = Beat.INHERIT;
+    /**
+     * contains the notes (and breaks) of this bar.
+     * the {@code Map<guitarStringIndex, Note} can be
+     * used to define notes and chords.
+     * <p>
+     * Standard tuning: E=0, A=1, ...
+     */
     private List<Map<Integer, Note>> notes = new ArrayList<>();
-    private SeparatorBar separator = null;
+    private SeparatorBar separator = SeparatorBar.NORMAL;
 
     public Bar() {
     }
@@ -62,16 +69,32 @@ public class Bar {
         addNote(-1, -1, null, length, beat);
     }
 
-    public Note addNote(int string, int fret, Tuning tuning, Length length, int beat) {
+    /**
+     * Adds a note to the end or to an existing beatIndex
+     *
+     * @param stringIndex the instrument string index
+     * @param fretNumber the fret number, 0 for open string, -1 for muted string
+     * @param tuning the tuning
+     * @param length the note length
+     * @param beatIndex the beat index to use or insert
+     * @return the inserted note
+     */
+    public Note addNote(int stringIndex, int fretNumber, Tuning tuning,
+                        Length length, int beatIndex) {
         Map<Integer, Note> notes;
-        if (beat == -1 || beat >= this.notes.size()) {
+        /*
+         * insert new beat in bar if not exists
+         */
+        if (beatIndex >= this.notes.size()) {
             notes = new HashMap<>();
             this.notes.add(notes);
         } else {
-            notes = this.notes.get(beat);
+            notes = this.notes.get(beatIndex);
         }
-        notes.put(string, new Note(string, fret, tuning, length, string == -1, Expression.PLUCK));
-        return notes.get(string);
+        notes.put(stringIndex, new Note(stringIndex, fretNumber, tuning,
+                length, stringIndex == -1,
+                Expression.PLUCK));
+        return notes.get(stringIndex);
     }
 
     public boolean isComplete(Beat b) {

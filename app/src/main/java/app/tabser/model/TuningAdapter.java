@@ -22,12 +22,12 @@ public class TuningAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return Tuning.TUNINGS.length;
+        return Tuning.STANDARD_TUNINGS.length;
     }
 
     @Override
     public Object getItem(int i) {
-        return Tuning.TUNINGS[i];
+        return Tuning.STANDARD_TUNINGS[i];
     }
 
     @Override
@@ -40,7 +40,7 @@ public class TuningAdapter extends BaseAdapter {
         if (Objects.isNull(view)) {
             view = inflater.inflate(android.R.layout.simple_list_item_1, null);
         }
-        String name = Tuning.TUNINGS[i].getName();
+        String name = Tuning.STANDARD_TUNINGS[i].getName();
         ((TextView) view.findViewById(android.R.id.text1)).setText(name);
         /*
         view.setOnClickListener(v -> {

@@ -25,20 +25,46 @@ public class Song {
      */
     private Clef clef = Clef.BASS;
     private Tuning tuning;
+    /**
+     * {@code @Deprecated}: set Beat in first bar
+     */
+    @Deprecated()
     private Beat beat;
+    /**
+     * label like lead guitar, rhythmic guitar, etc...
+     */
     private String instrument;
     /*
      * Song Metadata
      */
+    /**
+     * year 4 digits
+     */
     private int released;
+    /**
+     * Song performer
+     */
     private String artist;
     private String title;
     private String album;
     /*
      * Song data
      */
+    /**
+     * {@code Map<Identifier, Seqeuence>} repetitive song structures
+     *
+     *
+     * @see #sequenceOrder for occurance of sequences
+     */
     private Map<String, Sequence> sequenceMap = new HashMap<>();
+    /**
+     * The identifiers for the sequenceMap in order of
+     * appearance in the song
+     */
     private List<String> sequenceOrder = new ArrayList<>();
+    /**
+     * list of alternative songtexts
+     */
     private List<Songtext> songText = new ArrayList<>();
 
     public Song() {
@@ -135,7 +161,7 @@ public class Song {
     public boolean addNote(int string, int fret, Length speed, int barIndex, int beatIndex,
                            boolean autoBar, boolean insert, String sequenceKey, Context context) {
         Sequence sequence = checkGetSequence(sequenceKey);
-        ArrayList<Bar> bars = sequence.getBars();
+        List<Bar> bars = sequence.getBars();
         Bar bar;
         if (bars.size() == 0 || beatIndex == -1 || barIndex == -1 || bars.size() < barIndex) {
             bar = new Bar();
@@ -153,7 +179,7 @@ public class Song {
         }
         return false;
     }
-    public ArrayList<Bar> getBars(String sequenceKey) {
+    public List<Bar> getBars(String sequenceKey) {
         return checkGetSequence(sequenceKey).getBars();
     }
 
@@ -170,7 +196,7 @@ public class Song {
 
     public void clearNote(int selectedString, int barIndex, int beatIndex, String sequenceKey) {
         Sequence sequence = checkGetSequence(sequenceKey);
-        ArrayList<Bar> bars = sequence.getBars();
+        List<Bar> bars = sequence.getBars();
         if (bars.size() > barIndex && bars.get(barIndex).getNotes().size() > beatIndex) {
             List<Map<Integer, Note>> notes = bars.get(barIndex).getNotes();
             Map<Integer, Note> note = notes.get(beatIndex);
@@ -185,9 +211,14 @@ public class Song {
 
     }
 
+    /**
+     *
+     * @param sequenceKey
+     */
     public void addBar(String sequenceKey) {
         Sequence sequence = checkGetSequence(sequenceKey);
-        ArrayList<Bar> bars = sequence.getBars();
+        List<Bar> bars = sequence.getBars();
+        // TODO get beat as parameter
         bars.add(new Bar(beat, new ArrayList<>(), null));
     }
 

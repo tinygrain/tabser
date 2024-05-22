@@ -4,14 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import app.tabser.model.Song;
-import app.tabser.view.model.blocks.LineBlock;
 import app.tabser.view.model.blocks.PageBlock;
 import app.tabser.view.model.definition.RenderBlock;
-import app.tabser.view.model.blocks.SongHeaderBlock;
 import app.tabser.view.model.definition.Design;
 import app.tabser.view.model.definition.Sheet;
 import app.tabser.view.model.geometry.SheetMetrics;
-import app.tabser.view.render.RenderIterator;
 
 public class RenderModel {
     public static class SheetModel {
@@ -31,30 +28,7 @@ public class RenderModel {
         this.design = design;
     }
 
-    public RenderBlock next(RenderIterator iterator) {
-        if (sheetModel.documentBlocks.size() == 0) {
-            SongHeaderBlock headerBlock = new SongHeaderBlock(iterator.options.viewPort);
-            sheetModel.documentBlocks.add(headerBlock);
-            return headerBlock;
-        } else if (sheetModel.documentBlocks.size() == 1) {
-            LineBlock lineBlock = new LineBlock(iterator);
-            sheetModel.documentBlocks.add(lineBlock);
-            iterator.endReached = true;
-            return lineBlock;
-        } else if (sheetModel.documentBlocks.size() > iterator.blockOffset) {
-            return sheetModel.documentBlocks.get(iterator.blockOffset);
-        } else if (iterator.barOffset < song.getBars(iterator.sequenceKey).size()
-                && iterator.beatOffset < song.getBars(iterator.sequenceKey).get(iterator.barOffset).size()) {
-            LineBlock lineBlock = new LineBlock(iterator);
-            sheetModel.documentBlocks.add(lineBlock);
-            return lineBlock;
-        } else {
-            // TODO initialize other blocks
-        }
-        return null;
-    }
-
-//    public void calculate(RenderIterator iterator) {
+    //    public void calculate(RenderIterator iterator) {
 ////        float fullWidth = iterator.getModel().getFullWidth();
 //        if (!sheetModel.songHeaderBlock.isValid()) {
 //            sheetModel.songHeaderBlock.calculate(iterator);

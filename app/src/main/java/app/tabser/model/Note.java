@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Objects;
 
 public class Note {
-
     public static final String C = "C";
     public static final String C_SHARP = "C#";
     public static final String D = "D";
@@ -26,17 +25,17 @@ public class Note {
     private boolean isBreak;
     private Length length;
     private Pitch pitch;
-    private int string;
-    private int fret;
+    private int stringIndex;
+    private int fretNumber;
     private Expression expression;
 
     public Note() {
     }
 
-    public Note(int string, int fret, Tuning tuning, Length speed, boolean isBreak, Expression expression) {
-        this.pitch = tuning.resolve(string, fret);
-        this.string = string;
-        this.fret = fret;
+    public Note(int stringIndex, int fretNumber, Tuning tuning, Length speed, boolean isBreak, Expression expression) {
+        this.pitch = tuning.resolve(stringIndex, fretNumber);
+        this.stringIndex = stringIndex;
+        this.fretNumber = fretNumber;
         this.length = speed;
         this.isBreak = isBreak;
         this.expression = expression;
@@ -50,20 +49,20 @@ public class Note {
         this.pitch = pitch;
     }
 
-    public int getString() {
-        return string;
+    public int getStringIndex() {
+        return stringIndex;
     }
 
-    public void setString(int string) {
-        this.string = string;
+    public void setStringIndex(int stringIndex) {
+        this.stringIndex = stringIndex;
     }
 
-    public int getFret() {
-        return fret;
+    public int getFretNumber() {
+        return fretNumber;
     }
 
-    public void setFret(int fret) {
-        this.fret = fret;
+    public void setFretNumber(int fretNumber) {
+        this.fretNumber = fretNumber;
     }
 
     public Length getLength() {
@@ -107,11 +106,11 @@ public class Note {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Note note = (Note) o;
-        return string == note.string && fret == note.fret;
+        return stringIndex == note.stringIndex && fretNumber == note.fretNumber;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(pitch, string, fret);
+        return Objects.hash(pitch, stringIndex, fretNumber);
     }
 }

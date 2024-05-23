@@ -22,7 +22,7 @@ public abstract class AbstractSongRenderer implements SongRenderer {
        preProcess(iterator);
         while (iterator.hasNext()) {
             renderBlock(iterator);
-            if (iterator.pageEndReached && !iterator.endReached) {
+            if (iterator.pageEndReached && iterator.hasNext()) {
                 newPage(iterator);
                 iterator.pageOffset++;
                 iterator.yPosition = 0;

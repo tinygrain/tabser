@@ -18,7 +18,7 @@ public final class RenderIterator implements Iterator<RenderBlock> {
     public float xPosition;
     public float yPosition;
     public boolean pageEndReached;
-    public boolean endReached;
+    private boolean endReached;
     public int calculatedBarCount;
     public int calculatedBeatCount;
     public String sequenceKey = Sequence.DEFAULT_SEQUENCE_NAME;

@@ -65,7 +65,7 @@ public class Song {
     /**
      * list of alternative songtexts
      */
-    private List<Songtext> songText = new ArrayList<>();
+    private List<SongText> songText = new ArrayList<>();
 
     public Song() {
     }
@@ -150,11 +150,11 @@ public class Song {
         this.sequenceOrder = sequenceOrder;
     }
 
-    public List<Songtext> getSongText() {
+    public List<SongText> getSongText() {
         return songText;
     }
 
-    public void setSongText(List<Songtext> songText) {
+    public void setSongText(List<SongText> songText) {
         this.songText = songText;
     }
 

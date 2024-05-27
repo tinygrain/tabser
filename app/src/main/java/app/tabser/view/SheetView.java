@@ -12,29 +12,31 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import app.tabser.model.Bar;
 import app.tabser.model.Song;
-import app.tabser.view.model.definition.Design;
-import app.tabser.view.model.definition.Sheet;
+import app.tabser.view.render.Theme;
+import app.tabser.view.render.Sheet;
 import app.tabser.view.render.display.DisplaySheet;
 import app.tabser.view.render.display.DisplaySongRenderer;
-import app.tabser.view.model.geometry.SheetMetrics;
-import app.tabser.view.model.geometry.ViewPort;
+import app.tabser.view.viewmodel.geometry.SheetMetrics;
+import app.tabser.view.viewmodel.geometry.ViewPort;
 import app.tabser.view.render.RenderOptions;
 import app.tabser.view.render.SongRendererFactory;
 
-public class SongView implements View.OnScrollChangeListener, View.OnGenericMotionListener {
+public class SheetView extends View implements View.OnScrollChangeListener, View.OnGenericMotionListener {
+    private int width;
+    private int height;
     public final Navigation nav = new Navigation();
     public final Settings settings = new Settings();
-    private final Design design;
-    private final TabView tabView;
+    private final Theme theme;
+//    private final SheetScrollView sheetScrollView;
     private Song model;
     private Context context;
     //private ModelCursor[] displayedCursorPositions;
-    private SongCursor modelCursor;
+    private SheetCursor modelCursor;
 
 //    private float deltaY;
     private final ViewPort viewPort;
@@ -57,11 +59,14 @@ public class SongView implements View.OnScrollChangeListener, View.OnGenericMoti
 
     //private List<RenderedLine> renderedLines = new ArrayList<>();
 
-    SongView(TabView tabView, Design design) {
-        this.design = design;
-        this.context = tabView.getContext();
-        this.tabView = tabView;
-        modelCursor = new SongCursor();
+    SheetView(Theme theme, SharedPreferences preferences,
+              SheetController sheetController) {
+        super(sheetScrollView.getContext());
+        this.theme = theme;
+        this.context = sheetScrollView.getContext();
+        this.sheetScrollView = sheetScrollView;
+        settings.setUp(preferences);
+        modelCursor = new SheetCursor();
         viewPort = new ViewPort();
 //        viewPort.area = viewPort;
         this.options = RenderOptions.builder()
@@ -72,21 +77,48 @@ public class SongView implements View.OnScrollChangeListener, View.OnGenericMoti
                         RenderOptions.SheetFormat.Element.TAB)
                 .setSheetMetrics(SheetMetrics.getDefaultMetrics(viewPort))
                 .setCursor(modelCursor)
+                .setBuild(RenderOptions.Build.VERTICAL)
+                .setCache(false)
+                .setSongPages(RenderOptions.SongPages.SINGLE)
+                .setCompilation(RenderOptions.Compilation.SEQUENCE)
                 .build();
+
+        setOnTouchListener(sheetController);
+        setOnLongClickListener(sheetController);
     }
 
     void loadModel(Song model) {
         this.model = model;
         Sheet displaySheet = new DisplaySheet(context, options.sheetMetrics);
-        this.renderer = (DisplaySongRenderer) SongRendererFactory.create(model, displaySheet, design);
+        this.renderer = (DisplaySongRenderer) SongRendererFactory.create(model, displaySheet, theme, options);
     }
 
-    void drawSheet(Canvas canvas, Paint paint, boolean dragging) {
-        renderer.setUp(canvas, paint);
-        renderer.renderDocument(options);
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        Paint paint = new Paint();
+        if (Objects.nonNull(model)) {
+            renderer.setUp(canvas, paint);
+            renderer.renderDocument(options);
+        }
     }
 
-    public SongCursor getSongCursor() {
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        this.width = w;
+        this.height = h;
+        int left = 0;
+        int top = height / 3 * 2;
+        int right = width;
+        int bottom = height;
+        setViewPort(0, 0, w, h);
+        keyboardRect.set(left, top, right, bottom);
+        playerRect.set(0, height - height / 14, width, height);
+        invalidate();
+    }
+
+    public SheetCursor getSongCursor() {
         return modelCursor;
     }
 
@@ -97,7 +129,7 @@ public class SongView implements View.OnScrollChangeListener, View.OnGenericMoti
     String touch(MotionEvent event, boolean longClick) {
         int x = (int) event.getX();
         int y = (int) event.getY();
-        SongCursor tmpModelCursor = null;
+        SheetCursor tmpModelCursor = null;
         String message = "No Action";
 
 //        if (Objects.nonNull(displayedCursorPositions)) {
@@ -135,7 +167,7 @@ public class SongView implements View.OnScrollChangeListener, View.OnGenericMoti
         int lineOffset = renderer.getYMin();
 //        //float yMin = ((lineCount - 1) * l..height) * -1;
         viewPort.deltaY = Math.max(lineOffset, viewPort.deltaY);
-        tabView.invalidate();
+        sheetScrollView.invalidate();
     }
 
     @Override
@@ -224,7 +256,7 @@ public class SongView implements View.OnScrollChangeListener, View.OnGenericMoti
         public void onAnimationUpdate(@NonNull ValueAnimator valueAnimator) {
             int value = (int) valueAnimator.getAnimatedValue();
             viewPort.deltaY = animationStart + value;
-            tabView.invalidate();
+            sheetScrollView.invalidate();
         }
 
         void startAnimation(int yDelta1, int yDelta2, long animationTime) {

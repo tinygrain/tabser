@@ -1,11 +1,11 @@
-package app.tabser.view.model.blocks;
+package app.tabser.view.viewmodel.blocks;
 
 import android.graphics.Rect;
 
-import app.tabser.view.model.definition.RenderBlock;
-import app.tabser.view.model.geometry.ViewPort;
-import app.tabser.view.model.geometry.SheetMetrics;
-import app.tabser.view.render.RenderIterator;
+import app.tabser.view.viewmodel.RenderModel;
+import app.tabser.view.render.RenderBlock;
+import app.tabser.view.viewmodel.geometry.ViewPort;
+import app.tabser.view.viewmodel.geometry.SheetMetrics;
 
 public class PageBlock extends AbstractBlock implements RenderBlock {
     public PageBlock(ViewPort viewPort) {
@@ -13,12 +13,12 @@ public class PageBlock extends AbstractBlock implements RenderBlock {
     }
 
     @Override
-    protected void cache(RenderIterator iterator) {
+    protected void cache(RenderModel.RenderIterator iterator) {
 
     }
 
     @Override
-    protected Rect calculate(RenderIterator renderIterator) {
+    protected Rect calculate(RenderModel.RenderIterator renderIterator) {
         float fullWidth = renderIterator.getModel().getBlockWidth();
         SheetMetrics metrics = renderIterator.getModel().getSheetMetrics();
         float height = 2 * metrics.yIncrement;
@@ -27,7 +27,7 @@ public class PageBlock extends AbstractBlock implements RenderBlock {
     }
 
     @Override
-    protected void draw(RenderIterator iterator) {
+    protected void draw(RenderModel.RenderIterator iterator) {
 
     }
 }

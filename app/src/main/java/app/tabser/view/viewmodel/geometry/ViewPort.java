@@ -1,11 +1,11 @@
-package app.tabser.view.model.geometry;
+package app.tabser.view.viewmodel.geometry;
 
 import android.graphics.Rect;
 
 public final class ViewPort {
     public float deltaX;
     public float deltaY;
-    public Rect area = new Rect();
+    public final Rect area = new Rect();
 
     public Rect translate(Rect original) {
         return new Rect((int) (original.left + deltaX), (int) (original.top + deltaY),

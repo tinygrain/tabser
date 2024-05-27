@@ -4,16 +4,16 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class Tuning {
     public static final Tuning STANDARD_BASS_4 = new Tuning("Standard Bass (4)",
-            Pitch.of(Note.E, 2),
-            Pitch.of(Note.A, 2),
-            Pitch.of(Note.D, 3),
-            Pitch.of(Note.G, 3));
+            Pitch.of(Note.E, 1),
+            Pitch.of(Note.A, 1),
+            Pitch.of(Note.D, 2),
+            Pitch.of(Note.G, 2));
     public static Tuning STANDARD_BASS_5 = new Tuning("Standard Bass (5)",
             Pitch.of(Note.B, 0),
-            Pitch.of(Note.E, 2),
-            Pitch.of(Note.A, 2),
-            Pitch.of(Note.D, 3),
-            Pitch.of(Note.G, 3));
+            Pitch.of(Note.E, 1),
+            Pitch.of(Note.A, 1),
+            Pitch.of(Note.D, 2),
+            Pitch.of(Note.G, 2));
     public static Tuning STANDARD_GUITAR_6 = new Tuning("Standard Guitar (6)",
             Pitch.of(Note.E, 2),
             Pitch.of(Note.A, 2),
@@ -22,7 +22,7 @@ public class Tuning {
             Pitch.of(Note.B, 3),
             Pitch.of(Note.E, 4));
     public static Tuning STANDARD_GUITAR_7 = new Tuning("Standard Guitar (7)",
-            Pitch.of(Note.B, 0),
+            Pitch.of(Note.B, 1),
             Pitch.of(Note.E, 2),
             Pitch.of(Note.A, 2),
             Pitch.of(Note.D, 3),

@@ -1,8 +1,8 @@
-package app.tabser.view.model.definition;
+package app.tabser.view.render;
 
 import android.graphics.Rect;
 
-import app.tabser.view.model.geometry.SheetMetrics;
+import app.tabser.view.viewmodel.geometry.SheetMetrics;
 
 public interface Sheet {
 

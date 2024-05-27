@@ -9,25 +9,25 @@ import android.view.MotionEvent;
 
 import app.tabser.R;
 import app.tabser.model.Song;
-import app.tabser.view.SongView;
-import app.tabser.view.TabView;
+import app.tabser.view.SheetView;
+import app.tabser.view.SheetScrollView;
 import app.tabser.system.ToneGenerator;
 import app.tabser.view.ViewUtils;
-import app.tabser.view.model.definition.Design;
+import app.tabser.view.render.Theme;
 
-public class TabViewControls {
-    private final SongView view;
+public class ViewerMenu {
+    private final SheetView view;
     private final Context context;
-    private final Design design;
-    private final TabView tabView;
+    private final Theme theme;
+    private final SheetScrollView sheetScrollView;
     private final Rect[] buttonRects = new Rect[5];
     private Song model;
 
-    public TabViewControls(SongView view, Context context, Design design, TabView tabView) {
-        this.tabView = tabView;
+    public ViewerMenu(SheetView view, Context context, Theme theme, SheetScrollView sheetScrollView) {
+        this.sheetScrollView = sheetScrollView;
         this.view = view;
         this.context = context;
-        this.design = design;
+        this.theme = theme;
     }
 
     public void loadModel(Song model) {
@@ -37,8 +37,8 @@ public class TabViewControls {
     public float drawMenu(Canvas canvas, Paint paint) {
         int height = canvas.getHeight() / 14;
         float yStart = canvas.getHeight() - height;
-        int foregroundColor = design.getForegroundColorInactiveKeyboard();
-        int backgroundColor = design.getBackgroundColorKeyboard();
+        int foregroundColor = theme.getForegroundColorInactiveKeyboard();
+        int backgroundColor = theme.getBackgroundColorKeyboard();
         Rect topMenu = new Rect(0, (int) yStart, canvas.getWidth(), canvas.getHeight());
         paint.setColor(backgroundColor);
         canvas.drawRect(topMenu, paint);
@@ -86,8 +86,8 @@ public class TabViewControls {
                         break;
                     case 4: // Edit
                         message = "Edit";
-                        view.settings.setMode(SongView.Mode.EDIT);
-                        tabView.invalidate();
+                        view.settings.setMode(SheetView.Mode.EDIT);
+                        sheetScrollView.invalidate();
                         break;
                 }
             }

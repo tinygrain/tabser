@@ -16,28 +16,37 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import app.tabser.model.Song;
-import app.tabser.view.TabView;
+import app.tabser.view.SheetView;
 
-public class EditorActivity extends AppCompatActivity {
+public class SheetEditorActivity extends AppCompatActivity {
 
-    private TabView tabView;
+    private SheetView sheetView;
     private String fileName;
+    private Song song;
     //private TabModel tabModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_editor);
+        setContentView(R.layout.activity_sheet_editor);
         fileName = getIntent().getStringExtra("fileName");
         String mode = getIntent().getStringExtra("mode");
-        tabView = findViewById(R.id.tabView);
+        sheetView = findViewById(R.id.sheetView);
         try(InputStream in = openFileInput(fileName)){
-            tabView.loadModel(mode, new ObjectMapper().readValue(in, Song.class));
+            loadModel(mode, new ObjectMapper().readValue(in, Song.class));
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+    public void loadModel(String mode, Song model) {
+        this.song = model;
+        keyboard.loadModel(model);
+        sheetView.loadModel(model);
+        sheetView.settings.setMode(SheetView.Mode.valueOf(mode));
+        viewControls.loadModel(model);
+        invalidate();
     }
 
     @Override
@@ -47,7 +56,7 @@ public class EditorActivity extends AppCompatActivity {
         ObjectMapper om = new ObjectMapper();
         String data = "";
         try {
-            data = om.writerWithDefaultPrettyPrinter().writeValueAsString(tabView.getModel());
+            data = om.writerWithDefaultPrettyPrinter().writeValueAsString(sheetScrollView.getModel());
             Log.d("JSON!", data);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
@@ -64,8 +73,8 @@ public class EditorActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (tabView.isInSubMenu()) {
-            tabView.showKeyboardMainMenu();
+        if (sheetScrollView.isInSubMenu()) {
+            sheetScrollView.showKeyboardMainMenu();
         } else {
             super.onBackPressed();
         }

@@ -1,8 +1,8 @@
 package app.tabser.view.render;
 
-import app.tabser.view.SongCursor;
-import app.tabser.view.model.geometry.ViewPort;
-import app.tabser.view.model.geometry.SheetMetrics;
+import app.tabser.view.SheetCursor;
+import app.tabser.view.viewmodel.geometry.ViewPort;
+import app.tabser.view.viewmodel.geometry.SheetMetrics;
 
 public final class RenderOptions {
 
@@ -29,9 +29,12 @@ public final class RenderOptions {
 
     }
 
+    /**
+     * Layout direction
+     */
     public enum Build {
         /**
-         * Build line by linw
+         * Build line by line
          */
         VERTICAL,
         /**
@@ -101,15 +104,17 @@ public final class RenderOptions {
     }
     public final ViewPort viewPort;
     public final SheetMetrics sheetMetrics;
-    public final SongCursor currentCursor;
+    public final SheetCursor currentCursor;
     public final Form form;
     public final SheetFormat format;
     public final Build build;
     public final boolean cache;
+    public final Compilation compilation;
+    public final SongPages songPages;
 
     private RenderOptions(ViewPort viewPort, SheetMetrics sheetMetrics,
-                          SongCursor currentCursor, Form form, SheetFormat format,
-                          Build build, boolean cache) {
+                          SheetCursor currentCursor, Form form, SheetFormat format,
+                          Build build, boolean cache, Compilation compilation, SongPages songPages) {
         this.viewPort = viewPort;
         this.sheetMetrics = sheetMetrics;
         this.currentCursor = currentCursor;
@@ -117,21 +122,26 @@ public final class RenderOptions {
         this.format = format;
         this.build = build;
         this.cache = cache;
+        this.compilation = compilation;
+        this.songPages = songPages;
     }
 
-    public RenderOptions withCursor(SongCursor currentCursor) {
-        return new RenderOptions(viewPort, sheetMetrics, currentCursor, form, format, build, cache);
+    public RenderOptions withCursor(SheetCursor currentCursor) {
+        return new RenderOptions(viewPort, sheetMetrics, currentCursor, form, format, build, cache,
+                compilation, songPages);
     }
 
     public static final class Builder {
         private ViewPort viewPort = new ViewPort();
         private SheetMetrics sheetMetrics;
-        private SongCursor currentCursor = new SongCursor();
+        private SheetCursor currentCursor = new SheetCursor();
         private Form form = Form.FULL;
         private SheetFormat format = SheetFormat.build(SheetFormat.Element.NOTES,
                 SheetFormat.Element.SONG_TEXT, SheetFormat.Element.TAB);
         private Build build = Build.VERTICAL;
         private boolean cache = false;
+        private Compilation compilation = Compilation.SEQUENCE;
+        private SongPages songPages = SongPages.SINGLE;
 
         private Builder() {
         }
@@ -146,7 +156,7 @@ public final class RenderOptions {
             return this;
         }
 
-        public Builder setCursor(SongCursor cursor) {
+        public Builder setCursor(SheetCursor cursor) {
             this.currentCursor = cursor;
             return this;
         }
@@ -171,9 +181,21 @@ public final class RenderOptions {
             return this;
         }
 
+        public Builder setCompilation(Compilation compilation) {
+            this.compilation = compilation;
+            return this;
+        }
+
+        public Builder setSongPages(SongPages songPages) {
+            this.songPages = songPages;
+            return this;
+        }
+
+
+
         public RenderOptions build() {
-            return new RenderOptions(viewPort, sheetMetrics,
-                    currentCursor, form, format, build, cache);
+            return new RenderOptions(viewPort, sheetMetrics, currentCursor, form, format, build,
+                    cache, compilation, songPages);
         }
     }
 }

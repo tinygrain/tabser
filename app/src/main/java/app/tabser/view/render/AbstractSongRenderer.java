@@ -1,8 +1,6 @@
 package app.tabser.view.render;
 
-import app.tabser.view.model.RenderModel;
-import app.tabser.view.model.definition.RenderBlock;
-import app.tabser.view.model.definition.SongRenderer;
+import app.tabser.view.viewmodel.RenderModel;
 
 public abstract class AbstractSongRenderer implements SongRenderer {
 
@@ -12,30 +10,21 @@ public abstract class AbstractSongRenderer implements SongRenderer {
         this.renderModel = renderModel;
     }
 
-    protected RenderModel getRenderModel() {
-        return renderModel;
-    }
+//    protected RenderModel getRenderModel() {
+//        return renderModel;
+//    }
 
     @Override
     public void renderDocument(RenderOptions options) {
-       RenderIterator iterator = iterator(options);
-       preProcess(iterator);
+        RenderModel.RenderIterator iterator = renderModel.iterator();
+        preparePage(iterator);
         while (iterator.hasNext()) {
-            renderBlock(iterator);
-            if (iterator.pageEndReached && iterator.hasNext()) {
-                newPage(iterator);
-                iterator.pageOffset++;
-                iterator.yPosition = 0;
-            } else {
-            }
+            RenderBlock block = iterator.next();
+            block.render(iterator);
         }
-        postProcess(iterator);
+        postProcessDocument(iterator);
     }
 
-    private void renderBlock(RenderIterator iterator) {
-        RenderBlock block = iterator.next();
-        block.render(iterator);
-    }
 
     @Override
     public float getBlockOffsetY(int lineIndex) {
@@ -48,11 +37,6 @@ public abstract class AbstractSongRenderer implements SongRenderer {
     @Override
     public int getYMin() {
         return renderModel.getYMin();
-    }
-
-    protected RenderIterator iterator(RenderOptions options) {
-        // TODO return Iterable
-        return new RenderIterator(renderModel, options);
     }
 
     public RenderModel getModel() {

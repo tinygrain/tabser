@@ -2,14 +2,14 @@ package app.tabser.view;
 
 import android.graphics.Rect;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import app.tabser.model.Bar;
 import app.tabser.model.Sequence;
 import app.tabser.model.Song;
 import app.tabser.view.render.RenderOptions;
 
-public final class SongCursor {
+public final class SheetCursor {
     public String sequenceKey = Sequence.DEFAULT_SEQUENCE_NAME;
     public int barIndex;
     public int beatIndex;
@@ -27,7 +27,7 @@ public final class SongCursor {
     }
 
     public boolean isTrailing(Song model) {
-        ArrayList<Bar> bars = model.getBars(sequenceKey);
+        List<Bar> bars = model.getBars(sequenceKey);
         int lastBarSize = bars.size() > 0 ? bars.get(bars.size() - 1).size() : 0;
         return barIndex >= bars.size() - 1 && beatIndex == lastBarSize;
     }

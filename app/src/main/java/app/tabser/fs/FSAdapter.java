@@ -12,7 +12,7 @@ import android.widget.TextView;
 import java.io.File;
 import java.util.Objects;
 
-import app.tabser.EditorActivity;
+import app.tabser.SheetEditorActivity;
 
 public class FSAdapter extends BaseAdapter {
     private final File dataDir;
@@ -56,7 +56,7 @@ public class FSAdapter extends BaseAdapter {
         String fileName = files[i].getName();
         ((TextView) view.findViewById(android.R.id.text1)).setText(fileName);
         view.setOnClickListener(v -> {
-            Intent editorIntent = new Intent(activity, EditorActivity.class);
+            Intent editorIntent = new Intent(activity, SheetEditorActivity.class);
             editorIntent.putExtra("fileName", fileName);
             editorIntent.putExtra("mode", "VIEW");
             activity.startActivity(editorIntent);

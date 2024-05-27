@@ -9,8 +9,8 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 
 import app.tabser.view.ViewUtils;
-import app.tabser.view.model.definition.Sheet;
-import app.tabser.view.model.geometry.SheetMetrics;
+import app.tabser.view.render.Sheet;
+import app.tabser.view.viewmodel.geometry.SheetMetrics;
 import app.tabser.view.render.AbstractSheet;
 
 public class DisplaySheet extends AbstractSheet implements Sheet {

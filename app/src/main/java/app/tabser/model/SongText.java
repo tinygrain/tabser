@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Songtext {
+public class SongText {
     private String songVersionTitle;
     private CharSequence text;
     /**
@@ -14,7 +14,7 @@ public class Songtext {
     @JsonIgnore
     private Map<Integer, CharSequence> textPerBarMap = new HashMap<>();
 
-    public Songtext() {
+    public SongText() {
     }
 
     public CharSequence getText() {

@@ -1,15 +1,14 @@
-package app.tabser.view.model.blocks;
+package app.tabser.view.viewmodel.blocks;
 
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.Rect;
 
 import app.tabser.model.Song;
-import app.tabser.view.model.definition.RenderBlock;
-import app.tabser.view.model.definition.Sheet;
-import app.tabser.view.render.RenderIterator;
-import app.tabser.view.model.definition.Design;
-import app.tabser.view.model.geometry.LineMetrics;
+import app.tabser.view.viewmodel.RenderModel;
+import app.tabser.view.render.RenderBlock;
+import app.tabser.view.render.Sheet;
+import app.tabser.view.render.Theme;
+import app.tabser.view.viewmodel.geometry.LineMetrics;
 
 public class LineBlock extends AbstractBlock implements RenderBlock {
     private static class LineLayersCache {
@@ -28,13 +27,13 @@ public class LineBlock extends AbstractBlock implements RenderBlock {
     public boolean lastLine;
     public LineLayersCache cachedLine = new LineLayersCache();
 
-    public LineBlock(RenderIterator renderIterator) {
+    public LineBlock(RenderModel.RenderIterator renderIterator) {
         super(renderIterator.options.viewPort);
         //calculate(renderIterator);
     }
 
     @Override
-    protected Rect calculate(RenderIterator renderIterator) {
+    protected Rect calculate(RenderModel.RenderIterator renderIterator) {
         metrics = LineMetrics.calculateLine(renderIterator);
         lineIndex = renderIterator.lineOffset;
         barOffset = renderIterator.barOffset;
@@ -45,9 +44,9 @@ public class LineBlock extends AbstractBlock implements RenderBlock {
     }
 
     @Override
-    protected void draw(RenderIterator iterator) {
+    protected void draw(RenderModel.RenderIterator iterator) {
         Sheet sheet = iterator.getModel().sheet;
-        Design design = iterator.getModel().design;
+        Theme theme = iterator.getModel().theme;
         boolean compact = iterator.getModel().getSheetMetrics().compact;
         if (!compact) {
             drawStaffLines(sheet);
@@ -60,7 +59,7 @@ public class LineBlock extends AbstractBlock implements RenderBlock {
     }
 
     @Override
-    public void cache(RenderIterator iterator) {
+    public void cache(RenderModel.RenderIterator iterator) {
 
     }
 

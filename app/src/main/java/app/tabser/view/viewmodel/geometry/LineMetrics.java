@@ -1,19 +1,18 @@
-package app.tabser.view.model.geometry;
+package app.tabser.view.viewmodel.geometry;
 
 import android.graphics.Rect;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import app.tabser.model.Bar;
 import app.tabser.model.Note;
 import app.tabser.model.Song;
-import app.tabser.view.render.RenderIterator;
+import app.tabser.view.viewmodel.RenderModel;
 
 public final class LineMetrics {
 
-    public static LineMetrics calculateLine(RenderIterator renderIterator) {
+    public static LineMetrics calculateLine(RenderModel.RenderIterator renderIterator) {
         //Rect viewPort = renderIterator.getModel().sheet.getViewPort();
         SheetMetrics metrics = renderIterator.getModel().getSheetMetrics();
         /*
@@ -26,14 +25,15 @@ public final class LineMetrics {
         float calculatedWidth = 0f;
         float xStart = renderIterator.xPosition;
         int xElements = 0;
+
 //        int yElements = 0;
         renderIterator.calculatedBarCount = 0;
         renderIterator.calculatedBeatCount = 0;
         Song model = renderIterator.getModel().song;
-        ArrayList<Bar> bars = model.getBars(renderIterator.sequenceKey);
+        List<Bar> bars = model.getBars(renderIterator.sequenceKey);
         boolean eol = false;
-        LineMetrics lineMetrics = new LineMetrics();
-        lineMetrics.width = blockWidth;
+//        LineMetrics lineMetrics = new LineMetrics();
+        float width = blockWidth;
         if (renderIterator.barOffset < bars.size()) {
             outer:
             /*
@@ -72,19 +72,21 @@ public final class LineMetrics {
 //        } else {
 //            renderIterator.endReached = true;
         }
-        lineMetrics.xStart = xStart;
+//        float xStart = xStart;
+        float xIncrement;
+        boolean finalLine = false;
         if (eol) {
             /*
              * actual element width > default width
              *
              * beat, rhythm, break,
              */
-            lineMetrics.xIncrement = blockWidth / xElements;
+            xIncrement = blockWidth / xElements;
         } else {
-            renderIterator.endReached = true;
-            lineMetrics.xIncrement = defaultWidth;
+            finalLine = true;
+            xIncrement = defaultWidth;
         }
-        lineMetrics.xEnd = xStart + blockWidth;
+        float xEnd = xStart + blockWidth;
         /*
          * horizontal axis analysis (height)
          */
@@ -96,7 +98,7 @@ public final class LineMetrics {
         /*
          * Y block on page
          */
-        lineMetrics.yPage = renderIterator.yPosition;
+        float yPage = renderIterator.yPosition;
         /*
          * 1. Staff lines required
          */
@@ -131,37 +133,54 @@ public final class LineMetrics {
                 }
             }
         }
-        lineMetrics.staffTotal = Math.abs(staffLineMin - staffLineMax);
-        lineMetrics.yStaffStart = yCursor + (staffLineMax - 8) * (yInc / 2);
+        int staffTotal = Math.abs(staffLineMin - staffLineMax);
+        float yStaffStart = yCursor + (staffLineMax - 8) * (yInc / 2);
         /*
          * 2 Song text position
          */
-        lineMetrics.yTextStart = lineMetrics.yStaffStart + 4 * yInc
+        float yTextStart = yStaffStart + 4 * yInc
                 + (Math.abs(staffLineMin) * yInc / 2);
         /*
          * 3 Tab position
          */
-        lineMetrics.yTabStart = lineMetrics.yTextStart + 3 * yInc;
-        lineMetrics.height = lineMetrics.yTabStart + ((model.getTuning().getStringCount() - 1) * yInc);
-        lineMetrics.tabTotal = model.getTuning().getStringCount();
+        float yTabStart = yTextStart + 3 * yInc;
+        float height = yTabStart + ((model.getTuning().getStringCount() - 1) * yInc);
+        int tabTotal = model.getTuning().getStringCount();
         //renderIterator.yPosition += lineDimensions.height;
-        return lineMetrics;
+        return new LineMetrics(staffTotal, tabTotal, width, xStart, xEnd, xIncrement, yPage, height,
+                yStaffStart, yTextStart, yTabStart, finalLine);
     }
 
-    private LineMetrics() {
-    }
+    public final int staffTotal;
+    public  final int tabTotal;
+    public  final float width;
+    public final float xStart;
+    public final float xEnd;
+    public final float xIncrement;
+    public final float yPage;
+    public final float height;
+    public final float yStaffStart;
+    public final float yTextStart;
+    public final float yTabStart;
 
-    public int staffTotal;
-    public int tabTotal;
-    public float width;
-    public float xStart;
-    public float xEnd;
-    public float xIncrement;
-    public float yPage;
-    public float height;
-    public float yStaffStart;
-    public float yTextStart;
-    public float yTabStart;
+    public final boolean finalLine;
+
+    private LineMetrics(int staffTotal, int tabTotal, float width, float xStart, float xEnd,
+                        float xIncrement, float yPage, float height, float yStaffStart,
+                        float yTextStart, float yTabStart, boolean finalLine) {
+        this.staffTotal = staffTotal;
+        this.tabTotal = tabTotal;
+        this.width = width;
+        this.xStart = xStart;
+        this.xEnd = xEnd;
+        this.xIncrement = xIncrement;
+        this.yPage = yPage;
+        this.height = height;
+        this.yStaffStart = yStaffStart;
+        this.yTextStart = yTextStart;
+        this.yTabStart = yTabStart;
+        this.finalLine = finalLine;
+    }
 
     public Rect getBounds() {
         return new Rect((int) xStart, (int) yPage, (int) xEnd, (int) (yPage + height));

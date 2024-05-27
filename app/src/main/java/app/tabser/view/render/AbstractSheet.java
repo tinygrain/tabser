@@ -2,13 +2,12 @@ package app.tabser.view.render;
 
 import android.content.Context;
 
-import app.tabser.view.model.definition.Sheet;
-import app.tabser.view.model.geometry.SheetMetrics;
+import app.tabser.view.viewmodel.geometry.SheetMetrics;
 
 public abstract class AbstractSheet implements Sheet {
 //    private final Rect viewPort;
     private final SheetMetrics sheetMetrics;
-    private Context context;
+    private final Context context;
 
 
     public AbstractSheet(Context context, SheetMetrics sheetMetrics) {

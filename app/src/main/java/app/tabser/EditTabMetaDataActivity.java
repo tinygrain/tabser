@@ -144,7 +144,7 @@ public class EditTabMetaDataActivity extends AppCompatActivity
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        Intent i = new Intent(this, EditorActivity.class);
+        Intent i = new Intent(this, SheetEditorActivity.class);
         i.putExtra("fileName", fileName);
         i.putExtra("mode", "EDIT");
         startActivity(i);

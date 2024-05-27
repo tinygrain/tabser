@@ -1,8 +1,8 @@
-package app.tabser.view.model.definition;
+package app.tabser.view.render;
 
 import android.graphics.Rect;
 
-import app.tabser.view.render.RenderIterator;
+import app.tabser.view.viewmodel.RenderModel;
 
 public interface RenderBlock {
 
@@ -21,7 +21,7 @@ public interface RenderBlock {
 
     void touch(float x, float y, boolean longClick);
 
-    void render(RenderIterator iterator);
+    void render(RenderModel.RenderIterator iterator);
 
     void invalidate();
 

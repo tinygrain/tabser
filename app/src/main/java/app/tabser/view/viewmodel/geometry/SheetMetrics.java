@@ -1,4 +1,4 @@
-package app.tabser.view.model.geometry;
+package app.tabser.view.viewmodel.geometry;
 
 public class SheetMetrics {
     public static final SheetMetrics getDefaultMetrics(ViewPort viewPort) {

@@ -1,4 +1,4 @@
-package app.tabser.view.model.blocks;
+package app.tabser.view.viewmodel.blocks;
 
 import android.graphics.Rect;
 import android.util.Log;
@@ -7,10 +7,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import app.tabser.view.model.definition.RenderBlock;
-import app.tabser.view.model.geometry.ViewPort;
-import app.tabser.view.model.geometry.SheetMetrics;
-import app.tabser.view.render.RenderIterator;
+import app.tabser.view.viewmodel.RenderModel;
+import app.tabser.view.render.RenderBlock;
+import app.tabser.view.viewmodel.geometry.SheetMetrics;
+import app.tabser.view.viewmodel.geometry.ViewPort;
 
 public abstract class AbstractBlock implements RenderBlock {
     /**
@@ -86,7 +86,7 @@ public abstract class AbstractBlock implements RenderBlock {
     }
 
     @Override
-    public void render(RenderIterator iterator) {
+    public void render(RenderModel.RenderIterator iterator) {
         if (invalid) {
             setBounds(calculate(iterator));
             validate();
@@ -100,23 +100,22 @@ public abstract class AbstractBlock implements RenderBlock {
         } else {
             Log.d("RENDER", "OUTSIDE VIEW: " + this.toString());
         }
-        iterator.increment(this);
     }
 
     private boolean isInView() {
         return viewPort.isInView(getBounds());
     }
 
-    protected Rect boundsOnPage(RenderIterator renderIterator, int height) {
+    protected Rect boundsOnPage(RenderModel.RenderIterator renderIterator, int height) {
         float blockWidth = renderIterator.getModel().getBlockWidth();
         SheetMetrics metrics = renderIterator.getModel().getSheetMetrics();
         return new Rect((int) renderIterator.xPosition, (int) renderIterator.yPosition,
                 (int) (renderIterator.xPosition + blockWidth), (int) (renderIterator.yPosition + height));
     }
 
-    protected abstract void cache(RenderIterator iterator);
+    protected abstract void cache(RenderModel.RenderIterator iterator);
 
-    protected abstract void draw(RenderIterator iterator);
+    protected abstract void draw(RenderModel.RenderIterator iterator);
 
-    protected abstract Rect calculate(RenderIterator iterator);
+    protected abstract Rect calculate(RenderModel.RenderIterator iterator);
 }

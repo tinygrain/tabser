@@ -2,11 +2,10 @@ package app.tabser.view.render.pdf;
 
 import java.io.IOException;
 
+import app.tabser.view.viewmodel.RenderModel;
+import app.tabser.view.render.Sheet;
+import app.tabser.view.render.SongRenderer;
 import app.tabser.view.render.AbstractSongRenderer;
-import app.tabser.view.model.definition.Sheet;
-import app.tabser.view.model.definition.SongRenderer;
-import app.tabser.view.render.RenderIterator;
-import app.tabser.view.model.RenderModel;
 
 public class PDFSongRenderer extends AbstractSongRenderer implements SongRenderer {
 
@@ -18,12 +17,12 @@ public class PDFSongRenderer extends AbstractSongRenderer implements SongRendere
     }
 
     @Override
-    public void postProcess(RenderIterator iterator) {
+    public void postProcessDocument(RenderModel.RenderIterator iterator) {
         // TODO add header/footer
     }
 
     @Override
-    public void newPage(RenderIterator iterator) {
+    public void newPage(RenderModel.RenderIterator iterator) {
         try {
             sheet.newPage(iterator);
         } catch (IOException e) {

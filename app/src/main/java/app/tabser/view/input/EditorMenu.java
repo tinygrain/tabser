@@ -12,15 +12,15 @@ import android.view.View;
 import app.tabser.model.Pitch;
 import app.tabser.model.Length;
 import app.tabser.model.Song;
-import app.tabser.view.SongCursor;
-import app.tabser.view.SongView;
-import app.tabser.view.model.definition.Design;
+import app.tabser.view.SheetCursor;
+import app.tabser.view.SheetView;
+import app.tabser.view.render.Theme;
 
-public final class TabKeyboard {
-    private final SongView sheet;
-    private final Design design;
+public final class EditorMenu {
+    private final SheetView sheetView;
+    private final Theme theme;
 
-    private enum Menu {
+    public enum Menu {
         MAIN, FRET, BAR, MODE
     }
 
@@ -69,14 +69,13 @@ public final class TabKeyboard {
     private final SharedPreferences preferences;
     private final Context context;
 
-    public TabKeyboard(Rect menuRect, SongView sheet, Context c, Design design) {
-        this.design = design;
+    public EditorMenu(Rect menuRect, SheetView sheetView, Context c, Theme theme, SharedPreferences preferences) {
+        this.theme = theme;
         this.context = c;
         this.menuRect = menuRect;
-        this.sheet = sheet;
-        this.preferences = c.getSharedPreferences("Keyboard", Context.MODE_PRIVATE);
-        sheet.settings.setUp(preferences);
-        moreControls2[4] = sheet.settings.isInsert() ? "Insert" : "Over";
+        this.sheetView = sheetView;
+        this.preferences = preferences;
+        moreControls2[4] = sheetView.settings.isInsert() ? "Insert" : "Over";
         autoToggleInsert = preferences.getBoolean("auto-toggle-insert", false);
         selectedLength = preferences.getInt("speed", 2);
     }
@@ -87,10 +86,10 @@ public final class TabKeyboard {
     }
 
     public void drawControls(Canvas canvas, Paint paint) {
-        paint.setColor(design.getBackgroundColorKeyboard());
+        paint.setColor(theme.getBackgroundColorKeyboard());
         canvas.drawRect(menuRect, paint);
         int menuHeight = (menuRect.bottom - menuRect.top);
-        float xStart = sheet.getMetrics().xMargin;
+        float xStart = sheetView.getMetrics().xMargin;
         float x = xStart;
         if (menu == Menu.MAIN || menu == Menu.FRET) {
             x = drawStrings(xStart, menuHeight, paint, canvas);
@@ -114,7 +113,7 @@ public final class TabKeyboard {
 
     private float drawStrings(float xStart, int menuHeight, Paint paint, Canvas canvas) {
         Pitch[] pitches = model.getTuning().getPitches();
-        paint.setColor(design.getForegroundColorInactiveKeyboard());
+        paint.setColor(theme.getForegroundColorInactiveKeyboard());
         float textSize = (menuHeight - xStart) / model.getTuning().getStringCount();
         paint.setTextSize(textSize);
         float x = xStart * 2;
@@ -127,16 +126,16 @@ public final class TabKeyboard {
             xMax = Math.max(xMax, textBounds.right);
             Rect strRect = new Rect((int) x, (int) y + textBounds.top, (int) x + textBounds.right, (int) y);
             if (selectedString == i) {
-                paint.setColor(design.getForegroundColorActiveKeyboard());
+                paint.setColor(theme.getForegroundColorActiveKeyboard());
             } else {
-                paint.setColor(design.getForegroundColorInactiveKeyboard());
+                paint.setColor(theme.getForegroundColorInactiveKeyboard());
             }
             canvas.drawText(str, x, y, paint);
             stringRects[i] = strRect;
 
             y += textSize;
         }
-        paint.setColor(design.getForegroundColorInactiveKeyboard());
+        paint.setColor(theme.getForegroundColorInactiveKeyboard());
         return x + xMax + xStart * 2;
     }
 
@@ -159,14 +158,14 @@ public final class TabKeyboard {
             lengthRects[i] = strRect;
             float xCentered = x + xMax / 2 - textBounds.width() / 2;
             if (selectedLength == i) {
-                paint.setColor(design.getForegroundColorActiveKeyboard());
+                paint.setColor(theme.getForegroundColorActiveKeyboard());
             } else {
-                paint.setColor(design.getForegroundColorInactiveKeyboard());
+                paint.setColor(theme.getForegroundColorInactiveKeyboard());
             }
             canvas.drawText(str, xCentered, y, paint);
             y += textSize;
         }
-        paint.setColor(design.getForegroundColorInactiveKeyboard());
+        paint.setColor(theme.getForegroundColorInactiveKeyboard());
         return x + xMax + xStart;
     }
 
@@ -182,7 +181,7 @@ public final class TabKeyboard {
             moreRects[i] = strRect;
             float xCentered = x + width / 2 - textBounds.width() / 2f;
             canvas.drawText(str, xCentered, y, paint);
-            paint.setColor(design.getForegroundColorInactiveKeyboard());
+            paint.setColor(theme.getForegroundColorInactiveKeyboard());
             y += textSize;
         }
         return x + width + xStart;
@@ -200,7 +199,7 @@ public final class TabKeyboard {
             moreRects2[i] = strRect;
             float xCentered = x + width / 2 - textBounds.width() / 2f;
             canvas.drawText(str, xCentered, y, paint);
-            paint.setColor(design.getForegroundColorInactiveKeyboard());
+            paint.setColor(theme.getForegroundColorInactiveKeyboard());
             y += textSize;
         }
         return x + width + xStart;
@@ -232,8 +231,8 @@ public final class TabKeyboard {
         float y = menuRect.top + textSize;
         float x = 0;
         paint.setTextSize(textSize);
-        int foregroundColorInactive = design.getForegroundColorInactiveKeyboard();
-        int foregroundColorActive = design.getForegroundColorActiveKeyboard();
+        int foregroundColorInactive = theme.getForegroundColorInactiveKeyboard();
+        int foregroundColorActive = theme.getForegroundColorActiveKeyboard();
         paint.setColor(foregroundColorInactive);
         int xUnit = (menuWidth);
         int yUnit = (int) textSize;
@@ -244,15 +243,15 @@ public final class TabKeyboard {
             switch (yIndex) {
                 case 0:
                     // COMPACT
-                    paint.setColor(sheet.settings.isCompact() ? foregroundColorActive : foregroundColorInactive);
+                    paint.setColor(sheetView.settings.isCompact() ? foregroundColorActive : foregroundColorInactive);
                     break;
                 case 1:
                     // Auto Next
-                    paint.setColor(sheet.settings.isAutoNext() ? foregroundColorActive : foregroundColorInactive);
+                    paint.setColor(sheetView.settings.isAutoNext() ? foregroundColorActive : foregroundColorInactive);
                     break;
                 case 2:
                     // Auto Bar
-                    paint.setColor(sheet.settings.isAutoBar() ? foregroundColorActive : foregroundColorInactive);
+                    paint.setColor(sheetView.settings.isAutoBar() ? foregroundColorActive : foregroundColorInactive);
                     break;
                 case 3:
                     // Auto toggle ins
@@ -277,7 +276,7 @@ public final class TabKeyboard {
         float y = menuRect.top + textSize;
         float x = 0;
         paint.setTextSize(textSize);
-        paint.setColor(design.getForegroundColorInactiveKeyboard());
+        paint.setColor(theme.getForegroundColorInactiveKeyboard());
         int xUnit = (menuWidth);
         int yUnit = (int) textSize;
         for (int yIndex = 0; yIndex < barMenu.length; yIndex++) {
@@ -340,17 +339,17 @@ public final class TabKeyboard {
                         switch (i) {
                             case 0:
                                 // PREVIOUS
-                                sheet.nav.previousBeat();
+                                sheetView.nav.previousBeat();
                                 view.invalidate();
                                 break;
                             case 1:
                                 // Prev. Bar
-                                sheet.nav.previousBar();
+                                sheetView.nav.previousBar();
                                 view.invalidate();
                                 break;
                             case 2:
                                 // START
-                                sheet.nav.start();
+                                sheetView.nav.start();
                                 view.invalidate();
                                 break;
                             case 3:
@@ -358,7 +357,7 @@ public final class TabKeyboard {
                                 if (longClick) {
                                     menu = Menu.BAR;
                                 } else {
-                                    sheet.nav.newBar();
+                                    sheetView.nav.newBar();
                                 }
                                 view.invalidate();
                                 break;
@@ -381,17 +380,17 @@ public final class TabKeyboard {
                         switch (i) {
                             case 0:
                                 // NEXT
-                                sheet.nav.nextBeat();
+                                sheetView.nav.nextBeat();
                                 view.invalidate();
                                 break;
                             case 1:
                                 // NEXT Bar
-                                sheet.nav.nextBar();
+                                sheetView.nav.nextBar();
                                 view.invalidate();
                                 break;
                             case 2:
                                 // END
-                                sheet.nav.end();
+                                sheetView.nav.end();
                                 view.invalidate();
                                 break;
                             case 3:
@@ -399,15 +398,15 @@ public final class TabKeyboard {
                                 break;
                             case 4:
                                 // Over/Ins
-                                moreControls2[i] = sheet.settings.toggleInsert() ? "Insert" : "Over";
+                                moreControls2[i] = sheetView.settings.toggleInsert() ? "Insert" : "Over";
                                 SharedPreferences.Editor editInsert = preferences.edit();
-                                editInsert.putBoolean("insert", sheet.settings.isInsert());
+                                editInsert.putBoolean("insert", sheetView.settings.isInsert());
                                 editInsert.apply();
                                 view.invalidate();
                                 break;
                             case 5:
                                 // VIEW
-                                sheet.settings.setMode(SongView.Mode.VIEW);
+                                sheetView.settings.setMode(SheetView.Mode.VIEW);
                                 view.invalidate();
                                 break;
                         }
@@ -420,7 +419,7 @@ public final class TabKeyboard {
                         if (fretRects[yIndex][xIndex].contains((int) motionEvent.getX(), (int) motionEvent.getY())) {
                             message = fretStrings[yIndex][xIndex];
                             if ("-".equals(message)) {
-                                SongCursor mc = sheet.getSongCursor();
+                                SheetCursor mc = sheetView.getSongCursor();
                                 model.clearNote(selectedString, mc.barIndex, mc.beatIndex, mc.sequenceKey);
                             } else {
                                 int fret = -1;
@@ -428,14 +427,14 @@ public final class TabKeyboard {
                                     fret = Integer.parseInt(message);
                                 } catch (NumberFormatException e) {
                                 }
-                                SongCursor mc = sheet.getSongCursor();
+                                SheetCursor mc = sheetView.getSongCursor();
                                 boolean newBar = model.addNote(selectedString, fret,
                                         lengths[selectedLength], mc.barIndex, mc.beatIndex,
-                                        sheet.settings.isAutoBar(), sheet.settings.isInsert(), mc.sequenceKey, context);
+                                        sheetView.settings.isAutoBar(), sheetView.settings.isInsert(), mc.sequenceKey, context);
                                 if (newBar) {
-                                    sheet.nav.nextBar();
-                                } else if (sheet.settings.isAutoNext()) {
-                                    sheet.nav.nextBeat();
+                                    sheetView.nav.nextBar();
+                                } else if (sheetView.settings.isAutoNext()) {
+                                    sheetView.nav.nextBeat();
                                 }
                             }
                             menu = Menu.MAIN;
@@ -453,21 +452,21 @@ public final class TabKeyboard {
                             case 0:
                                 // COMPACT
                                 SharedPreferences.Editor e = preferences.edit();
-                                e.putBoolean("compact", sheet.settings.toggleCompact());
+                                e.putBoolean("compact", sheetView.settings.toggleCompact());
                                 e.apply();
                                 view.invalidate();
                                 break;
                             case 1:
                                 // Auto Next
                                 SharedPreferences.Editor e1 = preferences.edit();
-                                e1.putBoolean("auto-next", sheet.settings.toggleAutoNext());
+                                e1.putBoolean("auto-next", sheetView.settings.toggleAutoNext());
                                 e1.apply();
                                 view.invalidate();
                                 break;
                             case 2:
                                 // Auto Bar
                                 SharedPreferences.Editor e2 = preferences.edit();
-                                e2.putBoolean("auto-bar", sheet.settings.toggleAutoBar());
+                                e2.putBoolean("auto-bar", sheetView.settings.toggleAutoBar());
                                 e2.apply();
                                 view.invalidate();
                                 break;
@@ -492,7 +491,7 @@ public final class TabKeyboard {
                 for (int i = 0; i < barMenu.length; i++) {
                     switch (i) {
                         case 0: // Normal
-                            sheet.nav.newBar();
+                            sheetView.nav.newBar();
                             break;
                         case 1:
                             break;

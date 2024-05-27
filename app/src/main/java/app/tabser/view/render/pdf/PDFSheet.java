@@ -21,10 +21,10 @@ import java.util.Objects;
 
 import app.tabser.R;
 import app.tabser.view.ViewUtils;
-import app.tabser.view.model.definition.Sheet;
-import app.tabser.view.model.geometry.SheetMetrics;
+import app.tabser.view.viewmodel.RenderModel;
+import app.tabser.view.render.Sheet;
+import app.tabser.view.viewmodel.geometry.SheetMetrics;
 import app.tabser.view.render.AbstractSheet;
-import app.tabser.view.render.RenderIterator;
 
 public class PDFSheet extends AbstractSheet implements Sheet {
     private final PDDocument document;
@@ -45,7 +45,7 @@ public class PDFSheet extends AbstractSheet implements Sheet {
 
     @Override
     public void drawVector(int resId, float x, float y, float width, float height) {
-
+//        currentPageContentStream.
     }
 
     @Override
@@ -131,7 +131,7 @@ public class PDFSheet extends AbstractSheet implements Sheet {
 //        tv.setText("Successfully wrote PDF to " + path);
     }
 
-    public void newPage(RenderIterator iterator) throws IOException {
+    public void newPage(RenderModel.RenderIterator iterator) throws IOException {
         if (Objects.nonNull(iterator)) {
             iterator.pageOffset++;
             iterator.yPosition = 0;

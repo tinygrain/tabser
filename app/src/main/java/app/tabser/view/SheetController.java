@@ -11,10 +11,9 @@ import android.view.ViewConfiguration;
 
 import java.util.Objects;
 
-import app.tabser.view.input.EditorMenu;
 import app.tabser.view.input.EditorMenuController;
-import app.tabser.view.input.ViewerMenu;
 import app.tabser.view.input.ViewerMenuController;
+import app.tabser.view.render.Theme;
 
 public final class SheetController implements View.OnTouchListener, View.OnLongClickListener {
 
@@ -36,16 +35,18 @@ public final class SheetController implements View.OnTouchListener, View.OnLongC
 
     public final EditorMenuController editorMenuController;
     public final ViewerMenuController viewerMenuController;
+//    private final EditorMenu editorMenu;
+//    private final ViewerMenu viewerMenu;
 
-    public SheetController(Context context, SheetView sheetView) {
+    public SheetController(Context context, SheetView sheetView, Theme theme) {
         this.preferences = context.getSharedPreferences("Keyboard", Context.MODE_PRIVATE);
         this.sheetView = sheetView;
         this.viewerMenuController = new ViewerMenuController();
         this.editorMenuController = new EditorMenuController();
 //        public final sheetView =new SheetView(this, theme, preferences, sheetController);
-//        public final editorMenu =
+//        editorMenu =
 //        new EditorMenu(keyboardRect, sheetView, context, theme, preferences);
-//        public final viewerMenu =new ViewerMenu(sheetView, context, theme, this);
+//        viewerMenu =new ViewerMenu(sheetView, context, theme, this);
     }
 
     @Override
@@ -108,5 +109,9 @@ public final class SheetController implements View.OnTouchListener, View.OnLongC
     public boolean onLongClick(View view) {
         this.longClick = true;
         return false;
+    }
+
+    public SharedPreferences getPreferences() {
+        return preferences;
     }
 }

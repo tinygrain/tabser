@@ -69,12 +69,15 @@ public final class EditorMenu {
     private final SharedPreferences preferences;
     private final Context context;
 
+    private final EditorMenuController editorMenuController ;
+
     public EditorMenu(Rect menuRect, SheetView sheetView, Context c, Theme theme, SharedPreferences preferences) {
         this.theme = theme;
         this.context = c;
         this.menuRect = menuRect;
         this.sheetView = sheetView;
         this.preferences = preferences;
+        this.editorMenuController = new EditorMenuController();
         moreControls2[4] = sheetView.settings.isInsert() ? "Insert" : "Over";
         autoToggleInsert = preferences.getBoolean("auto-toggle-insert", false);
         selectedLength = preferences.getInt("speed", 2);

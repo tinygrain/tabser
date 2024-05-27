@@ -17,10 +17,14 @@ import java.nio.charset.StandardCharsets;
 
 import app.tabser.model.Song;
 import app.tabser.view.SheetView;
+import app.tabser.view.input.EditorMenu;
+import app.tabser.view.input.ViewerMenu;
 
 public class SheetEditorActivity extends AppCompatActivity {
 
     private SheetView sheetView;
+    private EditorMenu editorMenu;
+    private ViewerMenu viewerMenu;
     private String fileName;
     private Song song;
     //private TabModel tabModel;
@@ -32,6 +36,8 @@ public class SheetEditorActivity extends AppCompatActivity {
         fileName = getIntent().getStringExtra("fileName");
         String mode = getIntent().getStringExtra("mode");
         sheetView = findViewById(R.id.sheetView);
+        editorMenu = new EditorMenu(sheetView.keyboardRect, sheetView, getApplicationContext(), sheetView.getTheme(), sheetView.controller.getPreferences());
+        viewerMenu = new ViewerMenu(sheetView, getApplicationContext(), sheetView.getTheme());
         try(InputStream in = openFileInput(fileName)){
             loadModel(mode, new ObjectMapper().readValue(in, Song.class));
         } catch (FileNotFoundException e) {
@@ -42,11 +48,11 @@ public class SheetEditorActivity extends AppCompatActivity {
     }
     public void loadModel(String mode, Song model) {
         this.song = model;
-        keyboard.loadModel(model);
+        editorMenu.loadModel(model);
         sheetView.loadModel(model);
         sheetView.settings.setMode(SheetView.Mode.valueOf(mode));
-        viewControls.loadModel(model);
-        invalidate();
+        viewerMenu.loadModel(model);
+        sheetView.invalidate();
     }
 
     @Override
@@ -56,7 +62,7 @@ public class SheetEditorActivity extends AppCompatActivity {
         ObjectMapper om = new ObjectMapper();
         String data = "";
         try {
-            data = om.writerWithDefaultPrettyPrinter().writeValueAsString(sheetScrollView.getModel());
+            data = om.writerWithDefaultPrettyPrinter().writeValueAsString(song);
             Log.d("JSON!", data);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
@@ -73,8 +79,8 @@ public class SheetEditorActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (sheetScrollView.isInSubMenu()) {
-            sheetScrollView.showKeyboardMainMenu();
+        if (editorMenu.isInSubMenu()) {
+            editorMenu.showMainMenu(sheetView);
         } else {
             super.onBackPressed();
         }

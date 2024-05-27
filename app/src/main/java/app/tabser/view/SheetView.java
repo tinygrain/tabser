@@ -6,6 +6,8 @@ import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.Rect;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -32,40 +34,44 @@ public class SheetView extends View implements View.OnScrollChangeListener, View
     public final Navigation nav = new Navigation();
     public final Settings settings = new Settings();
     private final Theme theme;
-//    private final SheetScrollView sheetScrollView;
+    //    private final SheetScrollView sheetScrollView;
     private Song model;
     private Context context;
     //private ModelCursor[] displayedCursorPositions;
     private SheetCursor modelCursor;
 
-//    private float deltaY;
+    //    private float deltaY;
     private final ViewPort viewPort;
     private float downY;
     private float initialY;
 
-   // private int lineCount;
+    // private int lineCount;
     // private float lineHeight;
     private float ySheetEnd;
 
     private boolean searchCursor;
+    public final Rect keyboardRect = new Rect();
+    public final Rect playerRect = new Rect();
 
-   // private Rect viewPortArea = new Rect();
+    // private Rect viewPortArea = new Rect();
 
     private DisplaySongRenderer renderer;
 
     private final RenderOptions options;
 
+    public final SheetController controller;
+
 //    private final DisplaySheet sheet;
 
-    //private List<RenderedLine> renderedLines = new ArrayList<>();
-
-    SheetView(Theme theme, SharedPreferences preferences,
-              SheetController sheetController) {
-        super(sheetScrollView.getContext());
-        this.theme = theme;
-        this.context = sheetScrollView.getContext();
-        this.sheetScrollView = sheetScrollView;
-        settings.setUp(preferences);
+        //private List<RenderedLine> renderedLines = new ArrayList<>();
+//    Theme theme, SharedPreferences preferences,
+//    SheetController sheetController
+    public SheetView(Context context, AttributeSet attributeSet) {
+        super(context, attributeSet);
+        this.context = context;
+        this.theme = Theme.PAPER_MODE;
+        this.controller = new SheetController(context, this, theme);
+//        settings.setUp(preferences);
         modelCursor = new SheetCursor();
         viewPort = new ViewPort();
 //        viewPort.area = viewPort;
@@ -83,11 +89,15 @@ public class SheetView extends View implements View.OnScrollChangeListener, View
                 .setCompilation(RenderOptions.Compilation.SEQUENCE)
                 .build();
 
-        setOnTouchListener(sheetController);
-        setOnLongClickListener(sheetController);
+        setOnTouchListener(controller);
+        setOnLongClickListener(controller);
     }
 
-    void loadModel(Song model) {
+    public Theme getTheme() {
+        return theme;
+    }
+
+    public void loadModel(Song model) {
         this.model = model;
         Sheet displaySheet = new DisplaySheet(context, options.sheetMetrics);
         this.renderer = (DisplaySongRenderer) SongRendererFactory.create(model, displaySheet, theme, options);
@@ -167,7 +177,7 @@ public class SheetView extends View implements View.OnScrollChangeListener, View
         int lineOffset = renderer.getYMin();
 //        //float yMin = ((lineCount - 1) * l..height) * -1;
         viewPort.deltaY = Math.max(lineOffset, viewPort.deltaY);
-        sheetScrollView.invalidate();
+        invalidate();
     }
 
     @Override
@@ -248,7 +258,7 @@ public class SheetView extends View implements View.OnScrollChangeListener, View
         }
     }
 
-   public final class Navigation implements ValueAnimator.AnimatorUpdateListener {
+    public final class Navigation implements ValueAnimator.AnimatorUpdateListener {
         float animationStart;
         ValueAnimator animator;
 
@@ -256,7 +266,7 @@ public class SheetView extends View implements View.OnScrollChangeListener, View
         public void onAnimationUpdate(@NonNull ValueAnimator valueAnimator) {
             int value = (int) valueAnimator.getAnimatedValue();
             viewPort.deltaY = animationStart + value;
-            sheetScrollView.invalidate();
+            invalidate();
         }
 
         void startAnimation(int yDelta1, int yDelta2, long animationTime) {

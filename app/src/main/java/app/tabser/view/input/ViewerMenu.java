@@ -9,9 +9,8 @@ import android.view.MotionEvent;
 
 import app.tabser.R;
 import app.tabser.model.Song;
-import app.tabser.view.SheetView;
-import app.tabser.view.SheetScrollView;
 import app.tabser.system.ToneGenerator;
+import app.tabser.view.SheetView;
 import app.tabser.view.ViewUtils;
 import app.tabser.view.render.Theme;
 
@@ -19,12 +18,10 @@ public class ViewerMenu {
     private final SheetView view;
     private final Context context;
     private final Theme theme;
-    private final SheetScrollView sheetScrollView;
     private final Rect[] buttonRects = new Rect[5];
     private Song model;
 
-    public ViewerMenu(SheetView view, Context context, Theme theme, SheetScrollView sheetScrollView) {
-        this.sheetScrollView = sheetScrollView;
+    public ViewerMenu(SheetView view, Context context, Theme theme) {
         this.view = view;
         this.context = context;
         this.theme = theme;
@@ -87,7 +84,7 @@ public class ViewerMenu {
                     case 4: // Edit
                         message = "Edit";
                         view.settings.setMode(SheetView.Mode.EDIT);
-                        sheetScrollView.invalidate();
+                        view.invalidate();
                         break;
                 }
             }

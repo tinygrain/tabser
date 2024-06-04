@@ -1,4 +1,4 @@
-package app.tabser.model;
+package app.tabser.dom;
 
 import java.util.Objects;
 

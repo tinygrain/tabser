@@ -1,15 +1,5 @@
 package app.tabser.view;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.Rect;
-import android.widget.ScrollView;
-
-import app.tabser.model.Song;
-import app.tabser.view.input.EditorMenu;
-import app.tabser.view.input.ViewerMenu;
-import app.tabser.view.render.Theme;
 //
 //public class SheetScrollView extends ScrollView  {
 //

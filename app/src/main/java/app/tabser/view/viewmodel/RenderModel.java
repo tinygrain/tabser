@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
-import app.tabser.model.Sequence;
-import app.tabser.model.Song;
+import app.tabser.dom.Sequence;
+import app.tabser.dom.Song;
 import app.tabser.view.viewmodel.blocks.LineBlock;
 import app.tabser.view.viewmodel.blocks.PageBlock;
 import app.tabser.view.viewmodel.blocks.SongHeaderBlock;

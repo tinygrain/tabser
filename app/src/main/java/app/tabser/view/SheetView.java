@@ -4,7 +4,6 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -12,7 +11,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ScrollView;
 
 import androidx.annotation.NonNull;
@@ -20,8 +18,8 @@ import androidx.annotation.NonNull;
 import java.util.List;
 import java.util.Objects;
 
-import app.tabser.model.Bar;
-import app.tabser.model.Song;
+import app.tabser.dom.Bar;
+import app.tabser.dom.Song;
 import app.tabser.view.render.Theme;
 import app.tabser.view.render.Sheet;
 import app.tabser.view.render.display.DisplaySheet;

@@ -1,4 +1,4 @@
-package app.tabser.model;
+package app.tabser.view.viewmodel;
 
 import android.app.Activity;
 import android.content.Context;
@@ -8,26 +8,30 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
-public class TuningAdapter extends BaseAdapter {
+import app.tabser.dom.Beat;
 
+public class BeatAdapter extends BaseAdapter {
+    private List<Beat> beats = Arrays.asList(Beat.FOUR_FOURTH, Beat.THREE_FOURTH);
     private final Activity activity;
     private final LayoutInflater inflater;
 
-    public TuningAdapter(Activity activity) {
+    public BeatAdapter(Activity activity) {
         this.activity = activity;
         this.inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     @Override
     public int getCount() {
-        return Tuning.STANDARD_TUNINGS.length;
+        return beats.size();
     }
 
     @Override
     public Object getItem(int i) {
-        return Tuning.STANDARD_TUNINGS[i];
+        return beats.get(i);
     }
 
     @Override
@@ -40,7 +44,8 @@ public class TuningAdapter extends BaseAdapter {
         if (Objects.isNull(view)) {
             view = inflater.inflate(android.R.layout.simple_list_item_1, null);
         }
-        String name = Tuning.STANDARD_TUNINGS[i].getName();
+        Beat b = beats.get(i);
+        String name = String.format("%d/%d", b.getBar(), b.getCount());
         ((TextView) view.findViewById(android.R.id.text1)).setText(name);
         /*
         view.setOnClickListener(v -> {

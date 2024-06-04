@@ -1,4 +1,4 @@
-package app.tabser.model;
+package app.tabser.dom;
 
 /**
  * Relative to count in bar

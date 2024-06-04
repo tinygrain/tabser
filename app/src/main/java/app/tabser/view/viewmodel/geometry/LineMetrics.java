@@ -5,9 +5,9 @@ import android.graphics.Rect;
 import java.util.List;
 import java.util.Map;
 
-import app.tabser.model.Bar;
-import app.tabser.model.Note;
-import app.tabser.model.Song;
+import app.tabser.dom.Bar;
+import app.tabser.dom.Note;
+import app.tabser.dom.Song;
 import app.tabser.view.viewmodel.RenderModel;
 
 public final class LineMetrics {

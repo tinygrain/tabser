@@ -1,6 +1,6 @@
 package app.tabser.view.render;
 
-import app.tabser.model.Song;
+import app.tabser.dom.Song;
 import app.tabser.view.viewmodel.RenderModel;
 import app.tabser.view.render.display.DisplaySheet;
 import app.tabser.view.render.display.DisplaySongRenderer;

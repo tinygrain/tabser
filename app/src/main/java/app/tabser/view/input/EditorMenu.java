@@ -9,9 +9,9 @@ import android.graphics.Rect;
 import android.view.MotionEvent;
 import android.view.View;
 
-import app.tabser.model.Pitch;
-import app.tabser.model.Length;
-import app.tabser.model.Song;
+import app.tabser.dom.Pitch;
+import app.tabser.dom.Length;
+import app.tabser.dom.Song;
 import app.tabser.view.SheetCursor;
 import app.tabser.view.SheetView;
 import app.tabser.view.render.Theme;
@@ -433,7 +433,7 @@ public final class EditorMenu {
                                 SheetCursor mc = sheetView.getSongCursor();
                                 boolean newBar = model.addNote(selectedString, fret,
                                         lengths[selectedLength], mc.barIndex, mc.beatIndex,
-                                        sheetView.settings.isAutoBar(), sheetView.settings.isInsert(), mc.sequenceKey, context);
+                                        sheetView.settings.isAutoBar(), sheetView.settings.isInsert(), mc.sequenceKey);
                                 if (newBar) {
                                     sheetView.nav.nextBar();
                                 } else if (sheetView.settings.isAutoNext()) {

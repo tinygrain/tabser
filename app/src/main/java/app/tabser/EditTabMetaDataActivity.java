@@ -25,11 +25,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import app.tabser.fs.FS;
-import app.tabser.model.Beat;
-import app.tabser.model.BeatAdapter;
-import app.tabser.model.Song;
-import app.tabser.model.Tuning;
-import app.tabser.model.TuningAdapter;
+import app.tabser.dom.Beat;
+import app.tabser.view.viewmodel.BeatAdapter;
+import app.tabser.dom.Song;
+import app.tabser.dom.Tuning;
+import app.tabser.view.viewmodel.TuningAdapter;
 
 public class EditTabMetaDataActivity extends AppCompatActivity
 /*{

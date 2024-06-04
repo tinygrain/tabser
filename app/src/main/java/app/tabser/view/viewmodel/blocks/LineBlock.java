@@ -3,7 +3,7 @@ package app.tabser.view.viewmodel.blocks;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 
-import app.tabser.model.Song;
+import app.tabser.dom.Song;
 import app.tabser.view.viewmodel.RenderModel;
 import app.tabser.view.render.Sheet;
 import app.tabser.view.render.Theme;

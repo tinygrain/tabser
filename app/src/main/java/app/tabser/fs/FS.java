@@ -1,6 +1,6 @@
 package app.tabser.fs;
 
-import app.tabser.model.Song;
+import app.tabser.dom.Song;
 
 public class FS {
     private static final String formatName = "%s - %s - %d - %s.json";

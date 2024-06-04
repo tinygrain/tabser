@@ -11,10 +11,10 @@ import android.util.Log;
 import java.util.Map;
 import java.util.Objects;
 
-import app.tabser.model.Bar;
-import app.tabser.model.Note;
-import app.tabser.model.Sequence;
-import app.tabser.model.Song;
+import app.tabser.dom.Bar;
+import app.tabser.dom.Note;
+import app.tabser.dom.Sequence;
+import app.tabser.dom.Song;
 
 public class ToneGenerator {
     private final int sampleRate = 44100/5;

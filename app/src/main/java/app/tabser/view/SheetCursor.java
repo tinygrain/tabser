@@ -4,9 +4,9 @@ import android.graphics.Rect;
 
 import java.util.List;
 
-import app.tabser.model.Bar;
-import app.tabser.model.Sequence;
-import app.tabser.model.Song;
+import app.tabser.dom.Bar;
+import app.tabser.dom.Sequence;
+import app.tabser.dom.Song;
 import app.tabser.view.render.RenderOptions;
 
 public final class SheetCursor {

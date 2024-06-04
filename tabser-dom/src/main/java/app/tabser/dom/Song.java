@@ -1,14 +1,10 @@
-package app.tabser.model;
-
-import android.content.Context;
+package app.tabser.dom;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import app.tabser.system.ToneGenerator;
 
 public class Song {
 
@@ -159,7 +155,7 @@ public class Song {
     }
 
     public boolean addNote(int string, int fret, Length speed, int barIndex, int beatIndex,
-                           boolean autoBar, boolean insert, String sequenceKey, Context context) {
+                           boolean autoBar, boolean insert, String sequenceKey) {
         Sequence sequence = checkGetSequence(sequenceKey);
         List<Bar> bars = sequence.getBars();
         Bar bar;
@@ -170,8 +166,8 @@ public class Song {
             bar = bars.get(barIndex);
         }
         Note n = bar.addNote(string, fret, tuning, speed, beatIndex);
-        ToneGenerator tg = new ToneGenerator(context);
-        tg.play(n.getPitch().getFrequency(), 2);
+//        ToneGenerator tg = new ToneGenerator(context);
+//        tg.play(n.getPitch().getFrequency(), 2);
         if (autoBar && bar.isComplete(beat)) {
             bar.setSeparator(Bar.SeparatorBar.NORMAL);
             bars.add(new Bar());
@@ -219,7 +215,8 @@ public class Song {
         Sequence sequence = checkGetSequence(sequenceKey);
         List<Bar> bars = sequence.getBars();
         // TODO get beat as parameter
-        bars.add(new Bar(beat, new ArrayList<>(), null));
+        List<Map<Integer, Note>> empty = new ArrayList<>();
+        bars.add(new Bar(beat, empty, Bar.SeparatorBar.NORMAL));
     }
 
     @Override

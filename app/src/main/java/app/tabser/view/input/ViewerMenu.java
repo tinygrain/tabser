@@ -8,7 +8,7 @@ import android.graphics.drawable.Drawable;
 import android.view.MotionEvent;
 
 import app.tabser.R;
-import app.tabser.model.Song;
+import app.tabser.dom.Song;
 import app.tabser.system.ToneGenerator;
 import app.tabser.view.SheetView;
 import app.tabser.view.ViewUtils;

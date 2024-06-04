@@ -3,7 +3,6 @@ package app.tabser;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
@@ -18,7 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-import app.tabser.model.Song;
+import app.tabser.dom.Song;
 import app.tabser.view.MenuAnimator;
 import app.tabser.view.SheetView;
 import app.tabser.view.input.EditorMenu;

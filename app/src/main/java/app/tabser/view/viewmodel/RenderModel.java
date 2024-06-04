@@ -13,11 +13,10 @@ import app.tabser.model.Song;
 import app.tabser.view.viewmodel.blocks.LineBlock;
 import app.tabser.view.viewmodel.blocks.PageBlock;
 import app.tabser.view.viewmodel.blocks.SongHeaderBlock;
-import app.tabser.view.render.RenderBlock;
+import app.tabser.view.viewmodel.blocks.RenderBlock;
 import app.tabser.view.render.Theme;
 import app.tabser.view.render.Sheet;
 import app.tabser.view.viewmodel.geometry.SheetMetrics;
-import app.tabser.view.render.RenderContext;
 import app.tabser.view.render.RenderOptions;
 
 public class RenderModel implements Iterable<RenderBlock> {
@@ -36,8 +35,8 @@ public class RenderModel implements Iterable<RenderBlock> {
         /*
          * Song model return values
          */
-        public int calculatedBarCount;
-        public int calculatedBeatCount;
+//        public int calculatedBarCount;
+//        public int calculatedBeatCount;
         /*
          * draw / page coordinate cursors
          */

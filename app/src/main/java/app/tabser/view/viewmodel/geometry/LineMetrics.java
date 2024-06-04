@@ -27,8 +27,8 @@ public final class LineMetrics {
         int xElements = 0;
 
 //        int yElements = 0;
-        renderIterator.calculatedBarCount = 0;
-        renderIterator.calculatedBeatCount = 0;
+        int calculatedBarCount = 0;
+        int calculatedBeatCount = 0;
         Song model = renderIterator.getModel().song;
         List<Bar> bars = model.getBars(renderIterator.sequenceKey);
         boolean eol = false;
@@ -49,7 +49,7 @@ public final class LineMetrics {
                     if (notes.size() * defaultWidth > blockWidth) {
                         for (int i = notes.size() - 1; i > -1; i--) {
                             if (i * defaultWidth < blockWidth) {
-                                xElements = renderIterator.calculatedBeatCount = i + 1;
+                                xElements = calculatedBeatCount = i + 1;
                                 eol = true;
                                 break outer;
                             }
@@ -64,7 +64,7 @@ public final class LineMetrics {
                     eol = true;
                     break;
                 } else {
-                    renderIterator.calculatedBarCount++;
+                    calculatedBarCount++;
                     calculatedWidth += barWidth;
                     xElements += notes.size();
                 }
@@ -105,10 +105,10 @@ public final class LineMetrics {
         int staffLineMin = 0;// on bottom line
         int staffLineMax = 8;// on top line (nr 5 in 1/2 line steps)
 
-        if (renderIterator.calculatedBeatCount > 0) {
+        if (calculatedBeatCount > 0) {
             List<Map<Integer, Note>> notes = bars.get(renderIterator.barOffset).getNotes();
             for (int beatIndex = renderIterator.beatOffset;
-                 beatIndex < renderIterator.beatOffset + renderIterator.calculatedBeatCount;
+                 beatIndex < renderIterator.beatOffset + calculatedBeatCount;
                  beatIndex++) {
                 for (Map<Integer, Note> beatNotes : notes) {
                     for (Integer key : beatNotes.keySet()) {
@@ -118,9 +118,9 @@ public final class LineMetrics {
                     }
                 }
             }
-        } else if (renderIterator.calculatedBarCount > 0) {
+        } else if (calculatedBarCount > 0) {
             for (int barIndex = renderIterator.barOffset;
-                 barIndex < renderIterator.barOffset + renderIterator.calculatedBarCount;
+                 barIndex < renderIterator.barOffset + calculatedBarCount;
                  barIndex++) {
                 Bar bar = bars.get(barIndex);
                 List<Map<Integer, Note>> notes = bar.getNotes();
@@ -148,7 +148,7 @@ public final class LineMetrics {
         int tabTotal = model.getTuning().getStringCount();
         //renderIterator.yPosition += lineDimensions.height;
         return new LineMetrics(staffTotal, tabTotal, width, xStart, xEnd, xIncrement, yPage, height,
-                yStaffStart, yTextStart, yTabStart, finalLine);
+                yStaffStart, yTextStart, yTabStart, calculatedBeatCount, calculatedBarCount, finalLine);
     }
 
     public final int staffTotal;
@@ -162,12 +162,14 @@ public final class LineMetrics {
     public final float yStaffStart;
     public final float yTextStart;
     public final float yTabStart;
-
+    public final int calculatedBeatCount;
+    public final int calculatedBarCount;
     public final boolean finalLine;
 
     private LineMetrics(int staffTotal, int tabTotal, float width, float xStart, float xEnd,
                         float xIncrement, float yPage, float height, float yStaffStart,
-                        float yTextStart, float yTabStart, boolean finalLine) {
+                        float yTextStart, float yTabStart, int calculatedBeatCount,
+                        int calculatedBarCount, boolean finalLine) {
         this.staffTotal = staffTotal;
         this.tabTotal = tabTotal;
         this.width = width;
@@ -179,6 +181,8 @@ public final class LineMetrics {
         this.yStaffStart = yStaffStart;
         this.yTextStart = yTextStart;
         this.yTabStart = yTabStart;
+        this.calculatedBeatCount = calculatedBeatCount;
+        this.calculatedBarCount = calculatedBarCount;
         this.finalLine = finalLine;
     }
 

@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import app.tabser.view.viewmodel.RenderModel;
-import app.tabser.view.render.RenderBlock;
 import app.tabser.view.viewmodel.geometry.SheetMetrics;
 import app.tabser.view.viewmodel.geometry.ViewPort;
 

@@ -5,7 +5,6 @@ import android.graphics.Rect;
 
 import app.tabser.model.Song;
 import app.tabser.view.viewmodel.RenderModel;
-import app.tabser.view.render.RenderBlock;
 import app.tabser.view.render.Sheet;
 import app.tabser.view.render.Theme;
 import app.tabser.view.viewmodel.geometry.LineMetrics;
@@ -37,9 +36,9 @@ public class LineBlock extends AbstractBlock implements RenderBlock {
         metrics = LineMetrics.calculateLine(renderIterator);
         lineIndex = renderIterator.lineOffset;
         barOffset = renderIterator.barOffset;
-        barCount = renderIterator.calculatedBarCount;
+        barCount = metrics.calculatedBarCount;
         beatOffset = renderIterator.beatOffset;
-        beatCount = renderIterator.calculatedBeatCount;
+        beatCount = metrics.calculatedBeatCount;
         return metrics.getBounds();
     }
 

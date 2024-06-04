@@ -1,6 +1,7 @@
 package app.tabser.view.render;
 
 import app.tabser.view.viewmodel.RenderModel;
+import app.tabser.view.viewmodel.blocks.RenderBlock;
 
 public abstract class AbstractSongRenderer implements SongRenderer {
 
@@ -24,7 +25,6 @@ public abstract class AbstractSongRenderer implements SongRenderer {
         }
         postProcessDocument(iterator);
     }
-
 
     @Override
     public float getBlockOffsetY(int lineIndex) {

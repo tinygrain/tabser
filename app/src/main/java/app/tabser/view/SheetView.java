@@ -4,6 +4,7 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -11,6 +12,8 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ScrollView;
 
 import androidx.annotation.NonNull;
 
@@ -61,6 +64,8 @@ public class SheetView extends View implements View.OnScrollChangeListener, View
 
     public final SheetController controller;
 
+    private MenuAnimator menuAnimator;
+
 //    private final DisplaySheet sheet;
 
         //private List<RenderedLine> renderedLines = new ArrayList<>();
@@ -91,6 +96,13 @@ public class SheetView extends View implements View.OnScrollChangeListener, View
 
         setOnTouchListener(controller);
         setOnLongClickListener(controller);
+//        setBackgroundColor(Color.YELLOW);
+        setLayoutParams(new ScrollView.LayoutParams(500,5000));
+
+    }
+
+    public void setMenuAnimator(MenuAnimator menuAnimator) {
+        this.menuAnimator = menuAnimator;
     }
 
     public Theme getTheme() {
@@ -107,6 +119,7 @@ public class SheetView extends View implements View.OnScrollChangeListener, View
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         Paint paint = new Paint();
+        paint.setStrokeWidth(5f);
         if (Objects.nonNull(model)) {
             renderer.setUp(canvas, paint);
             renderer.renderDocument(options);

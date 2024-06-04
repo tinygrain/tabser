@@ -3,7 +3,6 @@ package app.tabser.view.viewmodel.blocks;
 import android.graphics.Rect;
 
 import app.tabser.view.viewmodel.RenderModel;
-import app.tabser.view.render.RenderBlock;
 import app.tabser.view.viewmodel.geometry.SheetMetrics;
 import app.tabser.view.viewmodel.geometry.ViewPort;
 

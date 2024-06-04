@@ -1,4 +1,4 @@
-package app.tabser.view.render;
+package app.tabser.view.viewmodel.blocks;
 
 import android.graphics.Rect;
 

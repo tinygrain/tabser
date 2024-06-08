@@ -1,4 +1,4 @@
-package app.tabser.view.render.display;
+package app.tabser.sheetview;
 
 import android.content.Context;
 import android.graphics.Canvas;

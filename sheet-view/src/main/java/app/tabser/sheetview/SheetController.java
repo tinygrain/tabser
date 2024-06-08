@@ -1,4 +1,4 @@
-package app.tabser.view;
+package app.tabser.sheetview;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -13,8 +13,10 @@ import java.util.Objects;
 
 import app.tabser.rendering.SheetCursor;
 import app.tabser.rendering.Theme;
-import app.tabser.view.input.EditorMenuController;
-import app.tabser.view.input.ViewerMenuController;
+import app.tabser.sheetview.menu.EditorMenuController;
+import app.tabser.sheetview.menu.ViewerMenuController;
+//import app.tabser.view.input.EditorMenuController;
+//import app.tabser.view.input.ViewerMenuController;
 
 public final class SheetController implements View.OnTouchListener, View.OnLongClickListener {
 

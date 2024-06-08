@@ -1,4 +1,4 @@
-package app.tabser.view.input;
+package app.tabser.sheetview.menu;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -14,8 +14,8 @@ import app.tabser.dom.Pitch;
 import app.tabser.dom.Song;
 import app.tabser.rendering.SheetCursor;
 import app.tabser.rendering.Theme;
-import app.tabser.view.AndroidColor;
-import app.tabser.view.SheetView;
+import app.tabser.sheetview.AndroidColor;
+import app.tabser.sheetview.SheetView;
 
 public final class EditorMenu {
     private final SheetView sheetView;

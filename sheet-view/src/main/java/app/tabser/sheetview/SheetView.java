@@ -1,4 +1,4 @@
-package app.tabser.view;
+package app.tabser.sheetview;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -23,8 +23,6 @@ import app.tabser.rendering.SheetCursor;
 import app.tabser.rendering.Theme;
 import app.tabser.rendering.geometry.Rectangle;
 import app.tabser.rendering.geometry.SheetMetrics;
-import app.tabser.view.render.display.DisplaySheet;
-import app.tabser.view.render.display.DisplaySongRenderer;
 
 public class SheetView extends View implements View.OnScrollChangeListener, View.OnGenericMotionListener {
     private int width;

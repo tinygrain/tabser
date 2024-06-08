@@ -193,7 +193,7 @@ public class RenderModel implements Iterable<RenderBlock> {
         return getSheetMetrics().viewPort.right - getSheetMetrics().pageSideMargin * 2f;
     }
 
-    public int getLineCount() {
-        return sheetModel.documentBlocks.size();
-    }
+//    public int getLineCount() {
+//        return sheetModel.documentBlocks.size();
+//    }
 }

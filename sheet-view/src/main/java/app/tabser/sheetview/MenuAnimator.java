@@ -1,4 +1,4 @@
-package app.tabser.view;
+package app.tabser.sheetview;
 
 import android.animation.LayoutTransition;
 import android.graphics.Rect;
@@ -7,7 +7,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-import app.tabser.view.input.MenuView;
+import app.tabser.sheetview.menu.MenuView;
+
+//import app.tabser.view.input.MenuView;
 
 public class MenuAnimator implements LayoutTransition.TransitionListener {
     public void reset() {
@@ -16,6 +18,11 @@ public class MenuAnimator implements LayoutTransition.TransitionListener {
 
     public void setHidePhase() {
         phase = Phase.HIDE;
+    }
+
+    public void startMode(SheetView.Mode mode) {
+        setMode(mode);
+        setHidePhase();
     }
 
     private enum Phase {SHOW, HIDE}

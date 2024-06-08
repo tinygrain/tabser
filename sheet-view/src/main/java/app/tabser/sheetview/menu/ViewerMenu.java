@@ -1,4 +1,4 @@
-package app.tabser.view.input;
+package app.tabser.sheetview.menu;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -7,25 +7,28 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.view.MotionEvent;
 
-import app.tabser.R;
+import java.util.Arrays;
+
 import app.tabser.dom.Song;
 import app.tabser.rendering.Theme;
-import app.tabser.system.ToneGenerator;
-import app.tabser.view.AndroidColor;
-import app.tabser.view.SheetView;
-import app.tabser.view.ViewUtils;
+import app.tabser.sheetview.AndroidColor;
+import app.tabser.sheetview.AndroidGraphicsLoader;
+import app.tabser.sheetview.R;
+import app.tabser.sheetview.SheetView;
 
 public class ViewerMenu {
     private final SheetView view;
     private final Context context;
     private final Theme theme;
     private final Rect[] buttonRects = new Rect[5];
+    private final int[] buttons;
     private Song model;
 
-    public ViewerMenu(SheetView view, Context context, Theme theme) {
+    public ViewerMenu(SheetView view, Context context, Theme theme, int[] buttons) {
         this.view = view;
         this.context = context;
         this.theme = theme;
+        this.buttons = Arrays.copyOf(buttons, buttons.length);
     }
 
     public void loadModel(Song model) {
@@ -42,8 +45,6 @@ public class ViewerMenu {
         canvas.drawRect(topMenu, paint);
         int buttonDim = (int) (height * 0.9);
         int yPos = (int) (height * 0.05);
-        int[] buttons = {R.drawable.baseline_play_arrow_24, R.drawable.baseline_stop_24,
-                R.drawable.baseline_loop_24, R.drawable.metronome, R.drawable.baseline_edit_24};
         int i = 0;
         int xPos = 0;
         yPos += (int) yStart;
@@ -51,7 +52,7 @@ public class ViewerMenu {
             if (i == buttons.length - 1) {
                 xPos = canvas.getWidth() - height;
             }
-            Drawable buttonDrawable = ViewUtils.getDrawable(context, button,
+            Drawable buttonDrawable = AndroidGraphicsLoader.getDrawable(context, button,
                     xPos, yPos, buttonDim, buttonDim);
             buttonDrawable.setTint(foregroundColor);
             buttonDrawable.draw(canvas);
@@ -70,8 +71,8 @@ public class ViewerMenu {
                 switch (i) {
                     case 0: // play
                         message = "Play";
-                        ToneGenerator tg = new ToneGenerator(context);
-                        tg.play(model);
+//                        ToneGenerator tg = new ToneGenerator(context);
+//                        tg.play(model);
                         break;
                     case 1: // Stop
                         message = "Stop";

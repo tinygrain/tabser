@@ -18,11 +18,11 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import app.tabser.dom.Song;
-import app.tabser.view.MenuAnimator;
-import app.tabser.view.SheetView;
-import app.tabser.view.input.EditorMenu;
-import app.tabser.view.input.MenuView;
-import app.tabser.view.input.ViewerMenu;
+import app.tabser.sheetview.MenuAnimator;
+import app.tabser.sheetview.SheetView;
+import app.tabser.sheetview.menu.EditorMenu;
+import app.tabser.sheetview.menu.MenuView;
+import app.tabser.sheetview.menu.ViewerMenu;
 
 public class SheetEditorActivity extends AppCompatActivity {
 
@@ -56,7 +56,9 @@ public class SheetEditorActivity extends AppCompatActivity {
 //        ((LinearLayout.LayoutParams)menuView.getLayoutParams()).weight = 25f;
         editorMenu = new EditorMenu(sheetView.keyboardRect, sheetView, getApplicationContext(),
                 sheetView.getTheme(), sheetView.controller.getPreferences());
-        viewerMenu = new ViewerMenu(sheetView, getApplicationContext(), sheetView.getTheme());
+        int[] buttons = {R.drawable.baseline_play_arrow_24, R.drawable.baseline_stop_24,
+                R.drawable.baseline_loop_24, R.drawable.metronome, R.drawable.baseline_edit_24};
+        viewerMenu = new ViewerMenu(sheetView, getApplicationContext(), sheetView.getTheme(), buttons);
         try (InputStream in = openFileInput(fileName)) {
             loadModel(modeString, new ObjectMapper().readValue(in, Song.class));
         } catch (FileNotFoundException e) {
@@ -64,8 +66,7 @@ public class SheetEditorActivity extends AppCompatActivity {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        menuAnimator.setMode(mode);
-        menuAnimator.setHidePhase();
+        menuAnimator.startMode(mode);
     }
 
     public void loadModel(String mode, Song model) {

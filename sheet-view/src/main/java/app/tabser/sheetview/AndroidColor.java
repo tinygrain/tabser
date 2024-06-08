@@ -1,4 +1,4 @@
-package app.tabser.view;
+package app.tabser.sheetview;
 
 import android.graphics.Color;
 

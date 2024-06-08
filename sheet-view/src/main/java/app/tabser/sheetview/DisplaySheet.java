@@ -1,4 +1,7 @@
-package app.tabser.view.render.display;
+package app.tabser.sheetview;
+
+import static app.tabser.rendering.Sheet.Stroke.DASHED_OUTLINE;
+import static app.tabser.rendering.Sheet.Stroke.FILL;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -12,7 +15,7 @@ import app.tabser.rendering.AbstractSheet;
 import app.tabser.rendering.Sheet;
 import app.tabser.rendering.geometry.Rectangle;
 import app.tabser.rendering.geometry.SheetMetrics;
-import app.tabser.view.ViewUtils;
+//import app.tabser.view.AndroidGraphicsLoader;
 
 public class DisplaySheet extends AbstractSheet implements Sheet {
     private Canvas canvas;
@@ -74,7 +77,7 @@ public class DisplaySheet extends AbstractSheet implements Sheet {
 
     @Override
     public void drawVector(int resId, float x, float y, float width, float height) {
-        Drawable drawable = ViewUtils.getDrawable(context, resId, (int) x, (int) y, (int) width, (int) height);
+        Drawable drawable = AndroidGraphicsLoader.getDrawable(context, resId, (int) x, (int) y, (int) width, (int) height);
         drawable.draw(canvas);
     }
 

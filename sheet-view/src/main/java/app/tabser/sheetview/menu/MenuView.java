@@ -1,4 +1,4 @@
-package app.tabser.view.input;
+package app.tabser.sheetview.menu;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -9,8 +9,8 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
-import app.tabser.view.MenuAnimator;
-import app.tabser.view.SheetView;
+import app.tabser.sheetview.MenuAnimator;
+import app.tabser.sheetview.SheetView;
 
 public class MenuView extends View implements View.OnTouchListener {
 

@@ -26,10 +26,10 @@ import java.nio.charset.StandardCharsets;
 
 import app.tabser.fs.FS;
 import app.tabser.dom.Beat;
-import app.tabser.view.viewmodel.BeatAdapter;
+import app.tabser.viewmodel.BeatAdapter;
 import app.tabser.dom.Song;
 import app.tabser.dom.Tuning;
-import app.tabser.view.viewmodel.TuningAdapter;
+import app.tabser.viewmodel.TuningAdapter;
 
 public class EditTabMetaDataActivity extends AppCompatActivity
 /*{

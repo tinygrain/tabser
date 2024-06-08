@@ -1,4 +1,4 @@
-package app.tabser.view.input;
+package app.tabser.sheetview.menu;
 
 public class EditorMenuController {
 

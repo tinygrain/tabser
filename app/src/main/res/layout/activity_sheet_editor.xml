@@ -17,14 +17,14 @@
         android:fillViewport="true"
         android:id="@+id/sheetScrollView">
 
-        <app.tabser.view.SheetView
+        <app.tabser.sheetview.SheetView
             android:id="@+id/sheetView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
     </ScrollView>
 
-    <app.tabser.view.input.MenuView
+    <app.tabser.sheetview.menu.MenuView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="0"

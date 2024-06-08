@@ -15,3 +15,5 @@ dependencyResolutionManagement {
 rootProject.name = "Tabser"
 include ':app'
 include ':tabser-dom'
+include ':tabser-pdf'
+include ':tabser-rendering'

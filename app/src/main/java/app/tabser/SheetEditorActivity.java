@@ -46,6 +46,7 @@ public class SheetEditorActivity extends AppCompatActivity {
         mode = SheetView.Mode.valueOf(modeString);
         sheetView = findViewById(R.id.sheetView);
         sheetScrollView = findViewById(R.id.sheetScrollView);
+        sheetScrollView.setOnGenericMotionListener(sheetView);
         menuView = findViewById(R.id.sheetMenu);
         sheetEditorLayout = findViewById(R.id.sheetEditorLayout);
         menuAnimator = new MenuAnimator(sheetEditorLayout, sheetScrollView, menuView, mode);

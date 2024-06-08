@@ -9,10 +9,11 @@ import android.view.MotionEvent;
 
 import app.tabser.R;
 import app.tabser.dom.Song;
+import app.tabser.rendering.Theme;
 import app.tabser.system.ToneGenerator;
+import app.tabser.view.AndroidColor;
 import app.tabser.view.SheetView;
 import app.tabser.view.ViewUtils;
-import app.tabser.view.render.Theme;
 
 public class ViewerMenu {
     private final SheetView view;
@@ -34,8 +35,8 @@ public class ViewerMenu {
     public float drawMenu(Canvas canvas, Paint paint) {
         int height = canvas.getHeight() / 14;
         float yStart = canvas.getHeight() - height;
-        int foregroundColor = theme.getForegroundColorInactiveKeyboard();
-        int backgroundColor = theme.getBackgroundColorKeyboard();
+        int foregroundColor = AndroidColor.getInt(theme.getForegroundColorInactiveKeyboard());
+        int backgroundColor = AndroidColor.getInt(theme.getBackgroundColorKeyboard());
         Rect topMenu = new Rect(0, (int) yStart, canvas.getWidth(), canvas.getHeight());
         paint.setColor(backgroundColor);
         canvas.drawRect(topMenu, paint);

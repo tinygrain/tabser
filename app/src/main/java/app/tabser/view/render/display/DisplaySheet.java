@@ -8,10 +8,11 @@ import android.graphics.PathEffect;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 
+import app.tabser.rendering.AbstractSheet;
+import app.tabser.rendering.Sheet;
+import app.tabser.rendering.geometry.Rectangle;
+import app.tabser.rendering.geometry.SheetMetrics;
 import app.tabser.view.ViewUtils;
-import app.tabser.view.render.Sheet;
-import app.tabser.view.viewmodel.geometry.SheetMetrics;
-import app.tabser.view.render.AbstractSheet;
 
 public class DisplaySheet extends AbstractSheet implements Sheet {
     private Canvas canvas;
@@ -21,15 +22,17 @@ public class DisplaySheet extends AbstractSheet implements Sheet {
     private int defaultColor;
     private PathEffect defaultPathEffect;
     private Paint.Style defaultStyle;
+    private Context context;
 
 
-    public DisplaySheet(Context context, SheetMetrics sheetMetrics) {
-        super(context, sheetMetrics);
+    public DisplaySheet(SheetMetrics sheetMetrics) {
+        super(sheetMetrics);
     }
 
-    public void setUp(Canvas canvas, Paint paint) {
+    public void setUp(Canvas canvas, Paint paint, Context context) {
         this.canvas = canvas;
         this.paint = paint;
+        this.context = context;
         defaultColor = paint.getColor();
         defaultTextSize = paint.getTextSize();
         defaultPathEffect = paint.getPathEffect();
@@ -71,13 +74,14 @@ public class DisplaySheet extends AbstractSheet implements Sheet {
 
     @Override
     public void drawVector(int resId, float x, float y, float width, float height) {
-        Drawable drawable = ViewUtils.getDrawable(getContext(), resId, (int) x, (int) y, (int) width, (int) height);
+        Drawable drawable = ViewUtils.getDrawable(context, resId, (int) x, (int) y, (int) width, (int) height);
         drawable.draw(canvas);
     }
 
     @Override
-    public void drawRect(Rect bounds) {
-        canvas.drawRect(bounds, paint);
+    public void drawRect(Rectangle bounds) {
+        Rect boundsA = new Rect((int) bounds.left, (int) bounds.top, (int) bounds.right, (int) bounds.bottom);
+        canvas.drawRect(boundsA, paint);
     }
 
     @Override

@@ -8,5 +8,5 @@ java {
 }
 
 dependencies {
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.17.0'
+    implementation project(':tabser-dom')
 }

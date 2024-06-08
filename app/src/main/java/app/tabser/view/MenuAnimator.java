@@ -1,6 +1,7 @@
 package app.tabser.view;
 
 import android.animation.LayoutTransition;
+import android.graphics.Rect;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +35,7 @@ public class MenuAnimator implements LayoutTransition.TransitionListener {
         layoutTransition.addTransitionListener(this);
         layoutTransition.setDuration(333L);
         layoutTransition.enableTransitionType(LayoutTransition.CHANGING);
+        Rect r = new Rect(0, 0, 0, 0);
     }
 
     public SheetView.Mode getMode() {
@@ -54,6 +56,7 @@ public class MenuAnimator implements LayoutTransition.TransitionListener {
         ((LinearLayout.LayoutParams) mainView.getLayoutParams()).weight = 100f;
         ((LinearLayout.LayoutParams) menuView.getLayoutParams()).weight = 0f;
         mainView.requestLayout();
+//        menuView.requestLayout();
     }
 
     private void showMenu() {
@@ -62,6 +65,7 @@ public class MenuAnimator implements LayoutTransition.TransitionListener {
         ((LinearLayout.LayoutParams) mainView.getLayoutParams()).weight = targetMainViewWeight;
         ((LinearLayout.LayoutParams) menuView.getLayoutParams()).weight = targetMenuWeight;
         mainView.requestLayout();
+//        menuView.requestLayout();
     }
 
     @Override

@@ -1,24 +1,27 @@
 package app.tabser.view.render.display;
 
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
-import app.tabser.view.render.AbstractSongRenderer;
-import app.tabser.view.render.Sheet;
-import app.tabser.view.render.SongRenderer;
-import app.tabser.view.viewmodel.RenderModel;
+import app.tabser.rendering.AbstractSongRenderer;
+import app.tabser.rendering.RenderModel;
+import app.tabser.rendering.Sheet;
+import app.tabser.rendering.SongRenderer;
 
 public class DisplaySongRenderer extends AbstractSongRenderer implements SongRenderer {
 
     private final DisplaySheet sheet;
+    private final Context context;
 
-    public DisplaySongRenderer(RenderModel renderModel, DisplaySheet sheet) {
+    public DisplaySongRenderer(RenderModel renderModel, DisplaySheet sheet, Context context) {
         super(renderModel);
         this.sheet = sheet;
+        this.context = context;
     }
 
     public void setUp(Canvas canvas, Paint paint) {
-        sheet.setUp(canvas, paint);
+        sheet.setUp(canvas, paint, context);
     }
 
     @Override

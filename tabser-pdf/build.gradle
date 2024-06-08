@@ -8,5 +8,6 @@ java {
 }
 
 dependencies {
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.17.0'
+    implementation group: 'com.tom-roush', name: 'pdfbox-android', version: '2.0.27.0'
+    implementation project(':tabser-rendering')
 }

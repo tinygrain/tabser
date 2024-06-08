@@ -11,9 +11,10 @@ import android.view.ViewConfiguration;
 
 import java.util.Objects;
 
+import app.tabser.rendering.SheetCursor;
+import app.tabser.rendering.Theme;
 import app.tabser.view.input.EditorMenuController;
 import app.tabser.view.input.ViewerMenuController;
-import app.tabser.view.render.Theme;
 
 public final class SheetController implements View.OnTouchListener, View.OnLongClickListener {
 
@@ -31,12 +32,11 @@ public final class SheetController implements View.OnTouchListener, View.OnLongC
     };
     private boolean dragging;
 //    private final SheetView sheetView;
-    private Point pointDown = new Point();
-
     public final EditorMenuController editorMenuController;
     public final ViewerMenuController viewerMenuController;
 //    private final EditorMenu editorMenu;
 //    private final ViewerMenu viewerMenu;
+    private final Point pointDown = new Point();
 
     public SheetController(Context context, SheetView sheetView, Theme theme) {
         this.preferences = context.getSharedPreferences("Keyboard", Context.MODE_PRIVATE);
@@ -55,7 +55,7 @@ public final class SheetController implements View.OnTouchListener, View.OnLongC
         if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
             pointDown.set((int) motionEvent.getX(), (int) motionEvent.getY());
             handler.postDelayed(touchScheduler, ViewConfiguration.getLongPressTimeout());
-            sheetView.startMove();
+//            sheetView.startMove();
         } else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
             if (dragging) {
                 dragging = false;
@@ -79,7 +79,7 @@ public final class SheetController implements View.OnTouchListener, View.OnLongC
 //                message = viewControls.touch(motionEvent, longClick);
 //                //Toast.makeText(context, viewControls.touch(motionEvent, longClick) + (longClick ? " -L" : ""), Toast.LENGTH_LONG).show();
 //            } else {
-            message = sheetView.touch(motionEvent, longClick);
+            message = touchSheet(motionEvent, longClick);
 //                //Toast.makeText(context, sheet.onTouch(motionEvent, longClick) + (longClick ? " -L" : ""), Toast.LENGTH_LONG).show();
 //            }
             if (longClick) {
@@ -93,12 +93,39 @@ public final class SheetController implements View.OnTouchListener, View.OnLongC
             handler.removeCallbacks(touchScheduler);
         }
         if ((motionEvent.getAction() == MotionEvent.ACTION_MOVE)) {
-            sheetView.moveVertical(pointDown, new Point((int) motionEvent.getX(), (int) motionEvent.getY()));
+//            sheetView.moveVertical(pointDown, new Point((int) motionEvent.getX(), (int) motionEvent.getY()));
         }
         log(message);
         return false;
     }
 
+    private String touchSheet(MotionEvent event, boolean longClick) {
+            int x = (int) event.getX();
+            int y = (int) event.getY();
+            SheetCursor tmpModelCursor = null;
+            String message = "No Action";
+
+//        if (Objects.nonNull(displayedCursorPositions)) {
+//            for (ModelCursor c : displayedCursorPositions) {
+//                if (c.selectionArea.contains(x, y)) {
+//                    tmpModelCursor = c;
+//                    searchCursor = true;
+//                    break;
+//                }
+//            }
+//            if (Objects.isNull(tmpModelCursor)) {
+//                if (ySheetEnd < event.getY()) {
+//                    nav.end();
+//                    message = "End";
+//                }
+//            } else {
+//                modelCursor = tmpModelCursor;
+//                message = "Cursor: bar(" + modelCursor.barIndex + ") / beat(" + modelCursor.beatIndex + ")";
+//            }
+//            tabView.invalidate();
+//        }
+            return message;
+        }
     private void log(String message) {
         if (Objects.nonNull(message) && message.length() > 0) {
             Log.d("app.tabser", message);

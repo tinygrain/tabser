@@ -9,12 +9,13 @@ import android.graphics.Rect;
 import android.view.MotionEvent;
 import android.view.View;
 
-import app.tabser.dom.Pitch;
 import app.tabser.dom.Length;
+import app.tabser.dom.Pitch;
 import app.tabser.dom.Song;
-import app.tabser.view.SheetCursor;
+import app.tabser.rendering.SheetCursor;
+import app.tabser.rendering.Theme;
+import app.tabser.view.AndroidColor;
 import app.tabser.view.SheetView;
-import app.tabser.view.render.Theme;
 
 public final class EditorMenu {
     private final SheetView sheetView;
@@ -89,7 +90,7 @@ public final class EditorMenu {
     }
 
     public void drawControls(Canvas canvas, Paint paint) {
-        paint.setColor(theme.getBackgroundColorKeyboard());
+        paint.setColor(AndroidColor.getInt(theme.getBackgroundColorKeyboard()));
         canvas.drawRect(menuRect, paint);
         int menuHeight = (menuRect.bottom - menuRect.top);
         float xStart = sheetView.getMetrics().xMargin;
@@ -116,7 +117,7 @@ public final class EditorMenu {
 
     private float drawStrings(float xStart, int menuHeight, Paint paint, Canvas canvas) {
         Pitch[] pitches = model.getTuning().getPitches();
-        paint.setColor(theme.getForegroundColorInactiveKeyboard());
+        paint.setColor(AndroidColor.getInt(theme.getForegroundColorInactiveKeyboard()));
         float textSize = (menuHeight - xStart) / model.getTuning().getStringCount();
         paint.setTextSize(textSize);
         float x = xStart * 2;
@@ -129,16 +130,16 @@ public final class EditorMenu {
             xMax = Math.max(xMax, textBounds.right);
             Rect strRect = new Rect((int) x, (int) y + textBounds.top, (int) x + textBounds.right, (int) y);
             if (selectedString == i) {
-                paint.setColor(theme.getForegroundColorActiveKeyboard());
+                paint.setColor(AndroidColor.getInt(theme.getForegroundColorActiveKeyboard()));
             } else {
-                paint.setColor(theme.getForegroundColorInactiveKeyboard());
+                paint.setColor(AndroidColor.getInt(theme.getForegroundColorInactiveKeyboard()));
             }
             canvas.drawText(str, x, y, paint);
             stringRects[i] = strRect;
 
             y += textSize;
         }
-        paint.setColor(theme.getForegroundColorInactiveKeyboard());
+        paint.setColor(AndroidColor.getInt(theme.getForegroundColorInactiveKeyboard()));
         return x + xMax + xStart * 2;
     }
 
@@ -161,14 +162,14 @@ public final class EditorMenu {
             lengthRects[i] = strRect;
             float xCentered = x + xMax / 2 - textBounds.width() / 2;
             if (selectedLength == i) {
-                paint.setColor(theme.getForegroundColorActiveKeyboard());
+                paint.setColor(AndroidColor.getInt(theme.getForegroundColorActiveKeyboard()));
             } else {
-                paint.setColor(theme.getForegroundColorInactiveKeyboard());
+                paint.setColor(AndroidColor.getInt(theme.getForegroundColorInactiveKeyboard()));
             }
             canvas.drawText(str, xCentered, y, paint);
             y += textSize;
         }
-        paint.setColor(theme.getForegroundColorInactiveKeyboard());
+        paint.setColor(AndroidColor.getInt(theme.getForegroundColorInactiveKeyboard()));
         return x + xMax + xStart;
     }
 
@@ -184,7 +185,7 @@ public final class EditorMenu {
             moreRects[i] = strRect;
             float xCentered = x + width / 2 - textBounds.width() / 2f;
             canvas.drawText(str, xCentered, y, paint);
-            paint.setColor(theme.getForegroundColorInactiveKeyboard());
+            paint.setColor(AndroidColor.getInt(theme.getForegroundColorInactiveKeyboard()));
             y += textSize;
         }
         return x + width + xStart;
@@ -202,7 +203,7 @@ public final class EditorMenu {
             moreRects2[i] = strRect;
             float xCentered = x + width / 2 - textBounds.width() / 2f;
             canvas.drawText(str, xCentered, y, paint);
-            paint.setColor(theme.getForegroundColorInactiveKeyboard());
+            paint.setColor(AndroidColor.getInt(theme.getForegroundColorInactiveKeyboard()));
             y += textSize;
         }
         return x + width + xStart;
@@ -234,8 +235,8 @@ public final class EditorMenu {
         float y = menuRect.top + textSize;
         float x = 0;
         paint.setTextSize(textSize);
-        int foregroundColorInactive = theme.getForegroundColorInactiveKeyboard();
-        int foregroundColorActive = theme.getForegroundColorActiveKeyboard();
+        int foregroundColorInactive = AndroidColor.getInt(theme.getForegroundColorInactiveKeyboard());
+        int foregroundColorActive = AndroidColor.getInt(theme.getForegroundColorActiveKeyboard());
         paint.setColor(foregroundColorInactive);
         int xUnit = (menuWidth);
         int yUnit = (int) textSize;
@@ -279,7 +280,7 @@ public final class EditorMenu {
         float y = menuRect.top + textSize;
         float x = 0;
         paint.setTextSize(textSize);
-        paint.setColor(theme.getForegroundColorInactiveKeyboard());
+        paint.setColor(AndroidColor.getInt(theme.getForegroundColorInactiveKeyboard()));
         int xUnit = (menuWidth);
         int yUnit = (int) textSize;
         for (int yIndex = 0; yIndex < barMenu.length; yIndex++) {
@@ -422,7 +423,7 @@ public final class EditorMenu {
                         if (fretRects[yIndex][xIndex].contains((int) motionEvent.getX(), (int) motionEvent.getY())) {
                             message = fretStrings[yIndex][xIndex];
                             if ("-".equals(message)) {
-                                SheetCursor mc = sheetView.getSongCursor();
+                                SheetCursor mc = sheetView.getSheetCursor();
                                 model.clearNote(selectedString, mc.barIndex, mc.beatIndex, mc.sequenceKey);
                             } else {
                                 int fret = -1;
@@ -430,7 +431,7 @@ public final class EditorMenu {
                                     fret = Integer.parseInt(message);
                                 } catch (NumberFormatException e) {
                                 }
-                                SheetCursor mc = sheetView.getSongCursor();
+                                SheetCursor mc = sheetView.getSheetCursor();
                                 boolean newBar = model.addNote(selectedString, fret,
                                         lengths[selectedLength], mc.barIndex, mc.beatIndex,
                                         sheetView.settings.isAutoBar(), sheetView.settings.isInsert(), mc.sequenceKey);

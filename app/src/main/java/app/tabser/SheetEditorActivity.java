@@ -3,6 +3,7 @@ package app.tabser;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
@@ -25,17 +26,11 @@ import app.tabser.sheetview.menu.MenuView;
 import app.tabser.sheetview.menu.ViewerMenu;
 
 public class SheetEditorActivity extends AppCompatActivity {
-
     private SheetView sheetView;
     private EditorMenu editorMenu;
     private ViewerMenu viewerMenu;
     private String fileName;
     private Song song;
-    private ScrollView sheetScrollView;
-    private MenuView menuView;
-    private MenuAnimator menuAnimator;
-    private LinearLayout sheetEditorLayout;
-    private SheetView.Mode mode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,24 +38,22 @@ public class SheetEditorActivity extends AppCompatActivity {
         setContentView(R.layout.activity_sheet_editor);
         fileName = getIntent().getStringExtra("fileName");
         String modeString = getIntent().getStringExtra("mode");
-        mode = SheetView.Mode.valueOf(modeString);
+        SheetView.Mode mode = SheetView.Mode.valueOf(modeString);
         sheetView = findViewById(R.id.sheetView);
-        sheetScrollView = findViewById(R.id.sheetScrollView);
+        ScrollView sheetScrollView = findViewById(R.id.sheetScrollView);
         sheetScrollView.setOnGenericMotionListener(sheetView);
-        menuView = findViewById(R.id.sheetMenu);
-        sheetEditorLayout = findViewById(R.id.sheetEditorLayout);
-        menuAnimator = new MenuAnimator(sheetEditorLayout, sheetScrollView, menuView, mode);
+        MenuView menuView = findViewById(R.id.sheetMenu);
+        LinearLayout sheetEditorLayout = findViewById(R.id.sheetEditorLayout);
+        MenuAnimator menuAnimator = new MenuAnimator(sheetEditorLayout, sheetScrollView, menuView, mode);
         sheetView.setMenuAnimator(menuAnimator);
         menuView.setMenuAnimator(menuAnimator);
-//        ((LinearLayout.LayoutParams)sheetScrollView.getLayoutParams()).weight = 75f;
-//        ((LinearLayout.LayoutParams)menuView.getLayoutParams()).weight = 25f;
         editorMenu = new EditorMenu(sheetView.keyboardRect, sheetView, getApplicationContext(),
                 sheetView.getTheme(), sheetView.controller.getPreferences());
         int[] buttons = {R.drawable.baseline_play_arrow_24, R.drawable.baseline_stop_24,
                 R.drawable.baseline_loop_24, R.drawable.metronome, R.drawable.baseline_edit_24};
         viewerMenu = new ViewerMenu(sheetView, getApplicationContext(), sheetView.getTheme(), buttons);
         try (InputStream in = openFileInput(fileName)) {
-            loadModel(modeString, new ObjectMapper().readValue(in, Song.class));
+            loadModel(mode, new ObjectMapper().readValue(in, Song.class));
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
@@ -69,11 +62,11 @@ public class SheetEditorActivity extends AppCompatActivity {
         menuAnimator.startMode(mode);
     }
 
-    public void loadModel(String mode, Song model) {
+    public void loadModel(SheetView.Mode mode, Song model) {
         this.song = model;
         editorMenu.loadModel(model);
         sheetView.loadModel(model);
-        sheetView.settings.setMode(SheetView.Mode.valueOf(mode));
+        sheetView.settings.setMode(mode);
         viewerMenu.loadModel(model);
         sheetView.invalidate();
     }
